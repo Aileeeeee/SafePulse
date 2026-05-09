@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     
     # Third party apps
     "incidents",
-    #."accounts",
+    #"accounts",
 
     # Third_party packages
     "rest_framework",
