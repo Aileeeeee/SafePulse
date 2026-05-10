@@ -1,5 +1,0 @@
-[33mdab7fab[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mpharida-api-feature[m[33m, [m[1;31morigin/pharida-api-feature[m[33m, [m[1;32mrecovery-backup[m[33m)[m serializers, endpoints and acknowledge setup
-[33md882482[m Comment out accounts app until Hannah creates it
-[33mb813e63[m Merge branch 'main' into pharida-api-feature
-[33m6608aa9[m Merge pull request #2 from Aileeeeee/safepulse_django_project_setup
-[33m2905a48[m Add serializer, list endpoint, acknowledge endpoint
