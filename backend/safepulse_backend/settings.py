@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 from decouple import config
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -40,9 +41,11 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework_simplejwt",
+    'rest_framework_simplejwt.token_blacklist', 
     "drf_spectacular",
     "corsheaders",
     "incidents",
+    'accounts'
 ]
 
 MIDDLEWARE = [
@@ -57,6 +60,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "safepulse_backend.urls"
+
+AUTH_USER_MODEL = 'accounts.NGOUser'
 
 TEMPLATES = [
     {
@@ -139,4 +144,19 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "API for managing incident reports and Pulse alerts.",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+}
+
+
+SIMPLE_JWT = {
+    # Increase the Access Token lifetime (e.g., to 1 hour)
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    
+    # Increase the Refresh Token lifetime (e.g., to 7 days)
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    
+    # Optional: Allow tokens to be refreshed
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    
+    'AUTH_HEADER_TYPES': ('Bearer',),
 }
