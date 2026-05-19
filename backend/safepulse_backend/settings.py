@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "incidents",
     'accounts'
+    'sms',
 ]
 
 MIDDLEWARE = [
@@ -148,13 +149,13 @@ SPECTACULAR_SETTINGS = {
 
 
 SIMPLE_JWT = {
-    # Increase the Access Token lifetime (e.g., to 1 hour)
+    # Access Token lifetime 
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
     
-    # Increase the Refresh Token lifetime (e.g., to 7 days)
+    # Refresh Token lifetime 
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     
-    # Optional: Allow tokens to be refreshed
+    # Allow tokens to be refreshed
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
     
