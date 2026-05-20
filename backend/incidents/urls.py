@@ -1,5 +1,6 @@
 from django.urls import path, include
 from . import views
+from incidents.ussd_views import USSDView
 
 
 urlpatterns = [
@@ -9,4 +10,5 @@ urlpatterns = [
     path('incidents/<int:pk>/acknowledge/', views.AcknowledgeIncidentView.as_view()),
     path('dashboard/', views.NGODashboardView.as_view()),
     path('coordinator-dashboard/', views.CoordinatorDashboardView.as_view()),
+    path('ussd/', USSDView.as_view(),name='ussd'),
 ]
