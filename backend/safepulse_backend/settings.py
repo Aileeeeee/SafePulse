@@ -21,17 +21,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
+AT_USERNAME = config("AT_USERNAME")
+AT_API_KEY = config("AT_API_KEY")
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = []
-
+#ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.ngrok-free.dev']
+ALLOWED_HOSTS = ['*']
 
 # Application definition
-
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -45,7 +47,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "corsheaders",
     "incidents",
-    'accounts'
+    'accounts',
     'sms',
 ]
 
@@ -61,6 +63,30 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "safepulse_backend.urls"
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
+
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "authorization",
+    "content-type",
+    "origin",
+    "x-requested-with",
+]
 
 AUTH_USER_MODEL = 'accounts.NGOUser'
 
@@ -150,10 +176,10 @@ SPECTACULAR_SETTINGS = {
 
 SIMPLE_JWT = {
     # Access Token lifetime 
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     
     # Refresh Token lifetime 
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     
     # Allow tokens to be refreshed
     'ROTATE_REFRESH_TOKENS': True,
