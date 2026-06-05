@@ -9,10 +9,11 @@ import hashlib
 
 
 INCIDENT_TYPE_MAP = {
-    'DV':  'Domestic Violence',
-    'SA':  'Sexual Assault',
-    'H':   'Harassment',
-    'CA':  'Child Abuse',
+    'DV': 'Domestic Violence',
+    'SA': 'Sexual Assault',
+    'H':  'Harassment',
+    'CA': 'Child Abuse',
+    'OT': 'Unknown',
 }
 
 SEVERITY_MAP = {
@@ -395,7 +396,7 @@ def handle_add(from_number, parts):
 
     name = parts[1]
     phone = parts[2]
-    relationship = ' '.join(parts[4:])
+    relationship = ' '.join(parts[3:])  
 
     TrustedContact.objects.create(
         registered_user=user,

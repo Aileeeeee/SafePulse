@@ -1,5 +1,6 @@
 from django.urls import path, include
 from . import views
+from incidents.ussd_views import USSDView
 
 
 urlpatterns = [
@@ -13,4 +14,5 @@ urlpatterns = [
     path('users/register/', views.RegisterDeviceView.as_view()),
     path('contacts/', views.TrustedContactListCreateView.as_view()),
     path('contacts/<int:pk>/', views.TrustedContactDeleteView.as_view()),
+    path('ussd/', USSDView.as_view(), name='ussd'),
 ]
