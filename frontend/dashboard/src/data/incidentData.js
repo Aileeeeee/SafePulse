@@ -21298,7 +21298,7 @@ export const severityDot = {
 
 export const topLocations = [
   { 
-    name: 'Kafanchan', 
+    name: 'Surulere', 
     rank: 1, 
     reports: 20, 
     max: 20 
