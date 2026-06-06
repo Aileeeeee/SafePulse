@@ -61,9 +61,10 @@ export default function AlertsModal({ onClose, alerts = [] }) {
   useEffect(() => {
     const fetchAlerts = async () => {
       try {
-        const res = await fetch('/api/incidents/incidents/');
+        const res = await fetch('http://127.0.0.1:8000/api/incidents/');
         if (res.ok) {
-          const incidents = await res.json();
+          const data = await res.json();
+          const incidents = data.results || data;
           setAllAlerts(incidents.slice(0, 20).map(mapIncidentToAlert));
         }
       } catch (err) {

@@ -20,9 +20,10 @@ export default function ActiveAlerts() {
   useEffect(() => {
     const fetchAlerts = async () => {
       try {
-        const res = await fetch('/api/incidents/incidents/');
+        const res = await fetch('http://127.0.0.1:8000/api/incidents/');
         if (res.ok) {
-          const incidents = await res.json();
+          const data = await res.json();
+          const incidents = data.results || data;
           const alerts = incidents.map(mapIncidentToAlert);
           setDisplayAlerts(alerts.slice(0, 5));
           setAllModalAlerts(alerts);
@@ -48,7 +49,7 @@ export default function ActiveAlerts() {
           <h2 className="text-base font-bold text-gray-800">Active Alerts</h2>
           <button
             onClick={() => setShowModal(true)}
-            className="text-xs text-emerald-700 font-semibold hover:text-emerald-600 transition-colors"
+            className="text-xs text-emerald-700 font-semibold hover:text-emerald-500 transition-colors cursor-pointer"
           >
             View all
           </button>
