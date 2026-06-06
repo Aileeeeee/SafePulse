@@ -4,11 +4,16 @@ import AlertsModal from './AlertsModal';
 
 const mapIncidentToAlert = (incident) => ({
   id: incident.id,
-  title: `${incident.type} Report`,
-  description: incident.notes || `${incident.type} incident reported`,
+  title: `${incident.incident_type} Report`,
+  description: incident.notes || `${incident.incident_type} incident reported`,
   location: incident.location,
   minutesAgo: Math.floor(Math.random() * 180) + 10,
-  severity: incident.severityScore >= 4 ? 'high' : incident.severityScore === 3 ? 'medium' : 'caution',
+  severity:
+    incident.severity_level === 'High' || incident.severity_level === 'Critical'
+      ? 'high'
+      : incident.severity_level === 'Medium'
+      ? 'medium'
+      : 'caution',
 });
 
 export default function ActiveAlerts() {

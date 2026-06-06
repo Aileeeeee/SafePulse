@@ -3,12 +3,23 @@ import { X, AlertOctagon, AlertTriangle, MapPin, Clock, ChevronRight } from 'luc
 
 const mapIncidentToAlert = (incident) => ({
   id: incident.id,
-  title: `${incident.type} Report`,
-  description: incident.notes || `${incident.type} incident reported. Severity: ${incident.severity}`,
+  title: `${incident.incident_type} Report`,
+  description:
+    incident.notes || `${incident.incident_type} incident reported. Severity: ${incident.severity_level}`,
   location: incident.location,
   minutesAgo: Math.floor(Math.random() * 180) + 10,
-  severity: incident.severityScore >= 4 ? 'high' : incident.severityScore === 3 ? 'medium' : 'caution',
-  status: incident.status === 'Ongoing' ? 'Active' : incident.status === 'Closed' ? 'In Review' : 'Monitoring',
+  severity:
+    incident.severity_level === 'High' || incident.severity_level === 'Critical'
+      ? 'high'
+      : incident.severity_level === 'Medium'
+      ? 'medium'
+      : 'caution',
+  status:
+    incident.follow_up_status === 'Ongoing'
+      ? 'Active'
+      : incident.follow_up_status === 'Closed'
+      ? 'In Review'
+      : 'Monitoring',
   reportCount: 1,
   assignedTo: `Officer ${String.fromCharCode(65 + (incident.id % 26))}`,
 });

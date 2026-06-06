@@ -22,13 +22,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY')
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-safe-pulse-local-dev-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=False, cast=bool)
+DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:4000",
+    "http://localhost:4000",
+]
 
 # Application definition
 
@@ -84,16 +88,26 @@ WSGI_APPLICATION = "safepulse_backend.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": config("DB_NAME"),
-        "USER": config("DB_USER"),
-        "PASSWORD": config("DB_PASSWORD"),
-        "HOST": config("DB_HOST"),
-        "PORT": config("DB_PORT"),
+DB_ENGINE = config('DB_ENGINE', default='sqlite')
+
+if DB_ENGINE == 'sqlite':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': config('DB_ENGINE', default='django.db.backends.postgresql'),
+            'NAME': config('DB_NAME'),
+            'USER': config('DB_USER'),
+            'PASSWORD': config('DB_PASSWORD'),
+            'HOST': config('DB_HOST'),
+            'PORT': config('DB_PORT'),
+        }
+    }
 
 
 # Password validation

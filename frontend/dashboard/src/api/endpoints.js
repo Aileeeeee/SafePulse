@@ -8,11 +8,11 @@ export const AUTH_ENDPOINTS = {
 };
 
 export const INCIDENT_ENDPOINTS = {
-  LIST: '/api/incidents/incidents/',
-  SUBMIT: '/api/incidents/incidents/submit/',
-  STATS: '/api/incidents/incidents/stats/',
-  ACKNOWLEDGE: (id) => `/api/incidents/incidents/${id}/acknowledge/`,
-  DETAIL: (id) => `/api/incidents/incidents/${id}/`,
+  LIST: '/api/incidents/',
+  SUBMIT: '/api/incidents/submit/',
+  STATS: '/api/incidents/stats/',
+  ACKNOWLEDGE: (id) => `/api/incidents/${id}/acknowledge/`,
+  DETAIL: (id) => `/api/incidents/${id}/`,
   DASHBOARD: '/api/incidents/dashboard/',
   COORDINATOR_DASHBOARD: '/api/incidents/coordinator-dashboard/',
 };
