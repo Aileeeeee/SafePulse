@@ -1,4 +1,4 @@
-from incidents.models import Organisation  # adjust import if model is in accounts app
+from accounts.models import Organisation
 
 organisations = [
     {
