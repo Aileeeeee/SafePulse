@@ -85,7 +85,7 @@ export default function AlertsModal({ onClose, alerts = [] }) {
         className="absolute inset-0 bg-black/40 transition-opacity duration-300"
         onClick={onClose}
       />
-      <div className="absolute top-0 right-0 h-full w-[480px] bg-gray-50 shadow-2xl flex flex-col animate-slideInRight overflow-hidden">
+      <div className="absolute top-0 right-0 h-full w-120 bg-gray-50 shadow-2xl flex flex-col animate-slideInRight overflow-hidden">
         {/* Header */}
         <div className="bg-white border-b border-gray-100 px-6 py-5 flex items-center justify-between shrink-0">
           <div>
@@ -180,7 +180,7 @@ export default function AlertsModal({ onClose, alerts = [] }) {
 
         {/* Footer */}
         <div className="bg-white border-t border-gray-100 px-6 py-4 shrink-0">
-          <button className="w-full bg-emerald-800 hover:bg-emerald-700 active:bg-emerald-900 text-white font-semibold text-sm py-3 rounded-xl transition-colors duration-150 shadow-sm">
+          <button className="w-full bg-emerald-800 hover:bg-emerald-600 active:bg-emerald-900 text-white font-semibold text-sm py-3 rounded-xl transition-colors duration-150 shadow-sm">
             Export Alert Report
           </button>
         </div>
