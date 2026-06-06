@@ -75,6 +75,10 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://safepulse-production-4e0d.up.railway.app",
+]
+
 CORS_ALLOW_METHODS = [
     "DELETE",
     "GET",
