@@ -28,7 +28,7 @@ print("AT_USERNAME =", AT_USERNAME)
 AT_API_KEY = config("AT_API_KEY")
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY')
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-safe-pulse-local-dev-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
@@ -115,12 +115,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "safepulse_backend.wsgi.application"
 
-
-# Database
-# https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-
-import os
-import dj_database_url
 
 DATABASES = {
     "default": dj_database_url.config(
