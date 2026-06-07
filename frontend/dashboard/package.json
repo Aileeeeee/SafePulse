@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "serve:api": "npm --prefix server run dev",
-    "serve:all": "npm run build && npm --prefix server start"
+    "serve:all": "npm run build && npm --prefix server start",
+    "dev:full": "concurrently \"npm run dev\" \"cd ..\\..\\backend && .\\venv\\Scripts\\python.exe manage.py runserver 127.0.0.1:8000\""
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.0",
@@ -23,6 +24,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "concurrently": "^10.0.3",
     "eslint": "^10.3.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
