@@ -94,10 +94,10 @@ class IncidentDetailView(APIView):
 
         # Step 4 — trusted contact notified
         trusted_contacts = []
-        if incident.device_hash:
+        if incident.phone_hash:
             try:
                 registered_user = RegisteredUser.objects.get(
-                    phone_hash=incident.device_hash
+                    phone_hash=incident.phone_hash
                 )
                 contacts = TrustedContact.objects.filter(
                     registered_user=registered_user
@@ -196,7 +196,7 @@ class IncidentSubmitView(APIView):
                     if lat and lng:
                         landmark = f'GPS: {float(lat):.4f}, {float(lng):.4f} — {incident.location}'
                     dispatch_pulse(
-                        phone_hash=request.data.get('device_hash', ''),
+                        phone_hash=request.data.get('phone_hash', ''),
                         zone=incident.location,
                         landmark=landmark,
                         carrier='Mobile App',
