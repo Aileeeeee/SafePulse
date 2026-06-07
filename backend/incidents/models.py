@@ -2,6 +2,73 @@ from django.db import models
 
 # Create your models here.
 
+class RegisteredUser(models.Model):
+    phone_hash      = models.CharField(max_length=64, unique=True)  
+    registered_zone = models.CharField(max_length=100)             
+    landmark        = models.TextField(blank=True, default='')     
+    carrier_name    = models.CharField(max_length=100, blank=True) 
+    network_code    = models.CharField(max_length=20,  blank=True) 
+    registered_at   = models.DateTimeField(auto_now_add=True)
+    last_pulse_at   = models.DateTimeField(null=True, blank=True)
+
+    # location tracking fields 
+    last_known_location     = models.TextField(blank=True, default='')
+    last_location_update_at = models.DateTimeField(null=True, blank=True)
+    last_location_source    = models.CharField(max_length=15,choices=[
+            ('GPS', 'GPS'), ('SMS_UPDATE', 'SMS Update'),
+            ('USSD_UPDATE', 'USSD Update'), ('REGISTERED', 'Registered'),
+        ],
+        default='REGISTERED', blank=True)
+ 
+    NETWORK_CODE_MAP = {
+        '62120': 'Airtel Nigeria',
+        '62130': 'MTN Nigeria',
+        '62150': 'Globacom (Glo)',
+        '62160': '9mobile',
+    }
+ 
+    @classmethod
+    def hash_phone(cls, phone_number):
+        import hashlib
+        return hashlib.sha256(phone_number.strip().encode()).hexdigest()
+ 
+    @classmethod
+    def carrier_from_code(cls, code):
+        return cls.NETWORK_CODE_MAP.get(str(code), 'Unknown')
+ 
+    def get_best_location(self):
+        if self.last_known_location:
+            return self.last_known_location
+        return self.landmark or self.registered_zone
+
+    def __str__(self):
+        return f'User [{self.phone_hash[:8]}...] — {self.registered_zone}'
+
+    
+class TrustedContact(models.Model):
+
+    registered_user = models.ForeignKey(RegisteredUser, on_delete=models.CASCADE,
+                                         related_name='trusted_contacts')
+    contact_phone   = models.CharField(max_length=20)   # Plain number — we need to SMS them
+    contact_name    = models.CharField(max_length=100)  # e.g. Grace
+    contact_gender =  models.CharField(max_length=100,null=True, blank=True)  # e.g. Female
+    relationship    = models.CharField(max_length=50,null=True, blank=True)   # e.g. Sister
+    added_at        = models.DateTimeField(auto_now_add=True)
+ 
+    def __str__(self):
+        return f'{self.contact_name} ({self.relationship})'
+ 
+
+class NGOContact(models.Model):
+    
+    zone     = models.CharField(max_length=100)   
+    org_name = models.CharField(max_length=200)   
+    phone    = models.CharField(max_length=20)    
+    is_active = models.BooleanField(default=True)
+ 
+    def __str__(self):
+        return f'{self.org_name} — {self.zone}'
+
 class Incident(models.Model):
 
     # Define Incident report options
@@ -102,72 +169,6 @@ class Incident(models.Model):
     def __str__(self):
         return f" [{self.id}] {self.incident_type} - {self.location} ({self.incident_date})]"
     
-class RegisteredUser(models.Model):
-    phone_hash      = models.CharField(max_length=64, unique=True)  
-    registered_zone = models.CharField(max_length=100)             
-    landmark        = models.TextField(blank=True, default='')     
-    carrier_name    = models.CharField(max_length=100, blank=True) 
-    network_code    = models.CharField(max_length=20,  blank=True) 
-    registered_at   = models.DateTimeField(auto_now_add=True)
-    last_pulse_at   = models.DateTimeField(null=True, blank=True)
-
-    # location tracking fields 
-    last_known_location     = models.TextField(blank=True, default='')
-    last_location_update_at = models.DateTimeField(null=True, blank=True)
-    last_location_source    = models.CharField(max_length=15,choices=[
-            ('GPS', 'GPS'), ('SMS_UPDATE', 'SMS Update'),
-            ('USSD_UPDATE', 'USSD Update'), ('REGISTERED', 'Registered'),
-        ],
-        default='REGISTERED', blank=True)
- 
-    NETWORK_CODE_MAP = {
-        '62120': 'Airtel Nigeria',
-        '62130': 'MTN Nigeria',
-        '62150': 'Globacom (Glo)',
-        '62160': '9mobile',
-    }
- 
-    @classmethod
-    def hash_phone(cls, phone_number):
-        import hashlib
-        return hashlib.sha256(phone_number.strip().encode()).hexdigest()
- 
-    @classmethod
-    def carrier_from_code(cls, code):
-        return cls.NETWORK_CODE_MAP.get(str(code), 'Unknown')
- 
-    def get_best_location(self):
-        if self.last_known_location:
-            return self.last_known_location
-        return self.landmark or self.registered_zone
-
-    def __str__(self):
-        return f'User [{self.phone_hash[:8]}...] — {self.registered_zone}'
-
-    
-class TrustedContact(models.Model):
-
-    registered_user = models.ForeignKey(RegisteredUser, on_delete=models.CASCADE,
-                                         related_name='trusted_contacts')
-    contact_phone   = models.CharField(max_length=20)   # Plain number — we need to SMS them
-    contact_name    = models.CharField(max_length=100)  # e.g. Grace
-    contact_gender =  models.CharField(max_length=100,null=True, blank=True)  # e.g. Female
-    relationship    = models.CharField(max_length=50,null=True, blank=True)   # e.g. Sister
-    added_at        = models.DateTimeField(auto_now_add=True)
- 
-    def __str__(self):
-        return f'{self.contact_name} ({self.relationship})'
- 
-
-class NGOContact(models.Model):
-    
-    zone     = models.CharField(max_length=100)   
-    org_name = models.CharField(max_length=200)   
-    phone    = models.CharField(max_length=20)    
-    is_active = models.BooleanField(default=True)
- 
-    def __str__(self):
-        return f'{self.org_name} — {self.zone}'
 
 class PulseSession(models.Model):
     TIMEOUT_SECONDS = 15
