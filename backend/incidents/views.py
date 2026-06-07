@@ -94,13 +94,13 @@ class IncidentDetailView(APIView):
 
         # Step 4 — trusted contact notified
         trusted_contacts = []
-        if incident.phone_hash:
+        if incident.registered_user:
             try:
                 registered_user = RegisteredUser.objects.get(
                     phone_hash=incident.phone_hash
                 )
                 contacts = TrustedContact.objects.filter(
-                    registered_user=registered_user
+                    registered_user=incident.registered_user
                 )
                 trusted_contacts = [
                     {
