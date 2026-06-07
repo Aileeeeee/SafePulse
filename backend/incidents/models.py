@@ -64,6 +64,13 @@ class Incident(models.Model):
     perpetrator_relationship = models.CharField(max_length=50, blank=True, default='Unknown')
     support_provided         = models.CharField(max_length=50, blank=True, default='')
     notes                    = models.TextField(blank=True, default='')
+    registered_user = models.ForeignKey(
+        RegisteredUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="incidents"
+    )
 
     # Acknowledge fields 
     is_acknowledged = models.BooleanField(default=False)
