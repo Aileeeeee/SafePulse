@@ -74,6 +74,16 @@ class Incident(models.Model):
     location_source = models.CharField(max_length=15, choices=LOCATION_SOURCE,default='REGISTERED', blank=True)
     last_verified_location  = models.TextField(blank=True, default='')
 
+    latitude          = models.FloatField(null=True, blank=True)
+    longitude         = models.FloatField(null=True, blank=True)
+    location_accuracy = models.FloatField(null=True, blank=True)
+    reporter_type     = models.CharField(
+        max_length=20,
+        choices=[('victim', 'Victim'), ('bystander', 'Bystander')],
+        default='victim',
+        blank=True,
+    )
+
     class Meta:
         ordering = ['-incident_date', '-incident_time']
 
@@ -119,6 +129,11 @@ class RegisteredUser(models.Model):
     def carrier_from_code(cls, code):
         return cls.NETWORK_CODE_MAP.get(str(code), 'Unknown')
  
+    def get_best_location(self):
+        if self.last_known_location:
+            return self.last_known_location
+        return self.landmark or self.registered_zone
+
     def __str__(self):
         return f'User [{self.phone_hash[:8]}...] — {self.registered_zone}'
 
@@ -129,7 +144,8 @@ class TrustedContact(models.Model):
                                          related_name='trusted_contacts')
     contact_phone   = models.CharField(max_length=20)   # Plain number — we need to SMS them
     contact_name    = models.CharField(max_length=100)  # e.g. Grace
-    relationship    = models.CharField(max_length=50)   # e.g. Sister
+    contact_gender =  models.CharField(max_length=100,null=True, blank=True)  # e.g. Female
+    relationship    = models.CharField(max_length=50,null=True, blank=True)   # e.g. Sister
     added_at        = models.DateTimeField(auto_now_add=True)
  
     def __str__(self):
