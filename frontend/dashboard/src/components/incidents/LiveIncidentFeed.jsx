@@ -20,12 +20,14 @@ export default function LiveIncidentFeed({ onNewReport, onSelectIncident, search
 
     async function loadIncidents() {
       try {
-        const response = await fetch(INCIDENT_ENDPOINTS.LIST, {
-          signal: controller.signal,
-        });
+        const response = await fetch('http://127.0.0.1:8000/api/incidents/');
         const data = await response.json();
-        setAllIncidents(data);
-        setFeedItems(data.slice(0, 2).map((inc, i) => ({ ...inc, feedKey: i })));
+
+        const list = Array.isArray(data) ? data : data.results ?? [];
+
+
+        setAllIncidents(list);
+        setFeedItems(list.slice(0, 2).map((inc, i) => ({ ...inc, feedKey: i })));
       } catch (error) {
         console.error('Failed to fetch incidents:', error);
         setFeedItems(incidents.slice(0, 2).map((inc, i) => ({ ...inc, feedKey: i })));

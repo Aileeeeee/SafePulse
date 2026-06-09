@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { X, AlertOctagon, AlertTriangle, MapPin, Clock, ChevronRight } from 'lucide-react';
+import { INCIDENT_ENDPOINTS } from '../../api/endpoints';
 
 const mapIncidentToAlert = (incident) => ({
   id: incident.id,
