@@ -6,8 +6,12 @@ export default defineConfig({
     tailwindcss(),
   ],
   server: {
-    proxy: {
-      '/api': 'http://127.0.0.1:8000'
+  proxy: {
+    '/api': {
+      target: 'https://safepulse-production-4e0d.up.railway.app',
+      changeOrigin: true,
+      secure: false,
     }
   }
+}
 })
