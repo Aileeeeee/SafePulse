@@ -74,8 +74,8 @@ export default function AlertsModal({ onClose, alerts = [] }) {
     const fetchAlerts = async () => {
       try {
         const response = await fetch('/api/incidents/incidents/');
-        if (res.ok) {
-          const data = await res.json();
+        if (response.ok) {
+          const data = await response.json();
           const incidents = data.results || data;
           setAllAlerts(incidents.slice(0, 20).map(mapIncidentToAlert));
         }
