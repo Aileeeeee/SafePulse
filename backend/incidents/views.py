@@ -11,6 +11,16 @@ from rest_framework import status, permissions
 from incidents.models import Incident,RegisteredUser, TrustedContact
 from incidents.serializers import IncidentSerializer, IncidentSubmissionSerializer,RegisteredUserSerializer, TrustedContactSerializer
 
+def add_timeline_event(incident, title, description='', color='green', actor='System'):
+    from incidents.models import IncidentTimeline
+    IncidentTimeline.objects.create(
+        incident=incident,
+        title=title,
+        description=description,
+        color=color,
+        actor=actor,
+    )
+
 # ── INCIDENT LIST — for dashboard cards ──────────────────────────────────
 class IncidentListView(ListAPIView):
     serializer_class = IncidentSerializer
@@ -465,3 +475,4 @@ class TrustedContactDeleteView(APIView):
                 {'error': 'Contact not found'},
                 status=status.HTTP_404_NOT_FOUND
             )
+
