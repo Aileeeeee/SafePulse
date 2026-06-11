@@ -10,4 +10,5 @@ urlpatterns = [
     path('refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('organisations/search/', views.OrganisationSearchView.as_view()),
     path('username-suggestions/', views.UsernameAvailabilityView.as_view()),
+    path('team/', views.TeamListView.as_view()),
 ]
