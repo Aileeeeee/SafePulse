@@ -184,3 +184,63 @@ class PulseSession(models.Model):
 
     def __str__(self):
         return f'PulseSession [{self.phone_hash[:8]}...] — {self.state}'
+
+
+class IncidentTimeline(models.Model):
+    """
+    Every action taken on an incident creates a timeline entry.
+    This is the living record of what happened and when.
+    """
+    COLOR_CHOICES = [
+        ('green',  'Green'),
+        ('orange', 'Orange'),
+        ('blue',   'Blue'),
+        ('purple', 'Purple'),
+        ('red',    'Red'),
+        ('grey',   'Grey'),
+    ]
+
+    incident    = models.ForeignKey(
+        Incident,
+        on_delete=models.CASCADE,
+        related_name='timeline_events'
+    )
+    title       = models.CharField(max_length=200)
+    description = models.TextField(blank=True, default='')
+    color       = models.CharField(max_length=10, choices=COLOR_CHOICES, default='green')
+    actor       = models.CharField(max_length=200, blank=True, default='System')
+    created_at  = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f'[{self.incident.id}] {self.title} — {self.created_at}'
+
+
+class IncidentAssignment(models.Model):
+    """
+    Tracks who a coordinator assigned an incident to.
+    """
+    incident     = models.OneToOneField(
+        Incident,
+        on_delete=models.CASCADE,
+        related_name='assignment'
+    )
+    assigned_to  = models.ForeignKey(
+        'accounts.NGOUser',
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='assigned_incidents'
+    )
+    assigned_by  = models.ForeignKey(
+        'accounts.NGOUser',
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='coordinator_assignments'
+    )
+    assigned_at  = models.DateTimeField(auto_now_add=True)
+    notes        = models.TextField(blank=True, default='')
+
+    def __str__(self):
+        return f'Incident {self.incident.id} → {self.assigned_to}'
