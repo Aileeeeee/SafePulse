@@ -37,8 +37,12 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-#ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.ngrok-free.dev']
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    'safepulse-production-4e0d.up.railway.app',
+    'localhost',
+    '127.0.0.1',
+    '.vercel.app', 
+]
 
 # Application definition
 INSTALLED_APPS = [
@@ -80,6 +84,12 @@ CORS_ALLOWED_ORIGINS = [
     "https://safe-pulse-psi.vercel.app",
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://safepulse-production-4e0d.up.railway.app',
+    'https://localhost:3000',
+    'http://localhost:3000',
+    'https://safe-pulse-psi.vercel.app',
+]
 CORS_ALLOW_METHODS = [
     "DELETE",
     "GET",
