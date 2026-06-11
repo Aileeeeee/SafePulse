@@ -60,22 +60,114 @@ class IncidentListView(ListAPIView):
         return queryset
 
 class IncidentDetailView(APIView):
-    """
-    GET /api/incidents/incidents/<pk>/
-    Returns a single incident by ID.
-    """
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, pk):
         try:
             incident = Incident.objects.get(pk=pk)
-            serializer = IncidentSerializer(incident)
-            return Response(serializer.data)
         except Incident.DoesNotExist:
             return Response(
                 {'error': 'Incident not found.'},
                 status=status.HTTP_404_NOT_FOUND
             )
+
+        user = request.user
+
+        # Access check for coordinator
+        if user.role == 'COORDINATOR' and user.organisation:
+            state = user.organisation.state
+            city  = user.organisation.city
+            if (state.lower() not in incident.location.lower() and
+                city.lower()  not in incident.location.lower()):
+                return Response(
+                    {'error': 'Access denied'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
+        # Access check for field staff — only see assigned incidents
+        if user.role == 'FIELD_STAFF':
+            try:
+                assignment = incident.assignment
+                if assignment.assigned_to != user:
+                    return Response(
+                        {'error': 'Access denied'},
+                        status=status.HTTP_403_FORBIDDEN
+                    )
+            except Exception:
+                return Response(
+                    {'error': 'This incident has not been assigned to you'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
+        # Get real timeline from database
+        from incidents.models import IncidentTimeline
+        timeline_qs = IncidentTimeline.objects.filter(
+            incident=incident
+        ).order_by('created_at')
+
+        timeline = [
+            {
+                'time':        t.created_at.strftime('%I:%M %p'),
+                'title':       t.title,
+                'description': t.description,
+                'color':       t.color,
+                'actor':       t.actor,
+                'status':      'done',
+            }
+            for t in timeline_qs
+        ]
+
+        # Add pending step if not closed
+        if incident.follow_up_status != 'Closed':
+            timeline.append({
+                'time':        '',
+                'title':       'Awaiting next action',
+                'description': '',
+                'color':       'grey',
+                'actor':       '',
+                'status':      'pending',
+            })
+
+        # Get trusted contacts from registered user
+        trusted_contacts = []
+        if incident.registered_user:
+            contacts = incident.registered_user.trusted_contacts.all()
+            trusted_contacts = [
+                {
+                    'name':        c.contact_name,
+                    'relation':    c.relationship or '',
+                    'phone':       c.contact_phone,
+                    'notified_at': incident.created_at.strftime('%I:%M %p'),
+                }
+                for c in contacts
+            ]
+
+        # Get assignment info
+        assignment_data = None
+        try:
+            a = incident.assignment
+            assignment_data = {
+                'assigned_to': {
+                    'id':       a.assigned_to.id,
+                    'name':     f'{a.assigned_to.first_name} {a.assigned_to.last_name}'.strip() or a.assigned_to.username,
+                    'username': a.assigned_to.username,
+                },
+                'assigned_by': {
+                    'name': f'{a.assigned_by.first_name} {a.assigned_by.last_name}'.strip() or a.assigned_by.username,
+                },
+                'assigned_at': a.assigned_at,
+                'notes':       a.notes,
+            }
+        except Exception:
+            pass
+
+        serializer = IncidentSerializer(incident)
+        return Response({
+            **serializer.data,
+            'timeline':         timeline,
+            'trusted_contacts': trusted_contacts,
+            'assignment':       assignment_data,
+        })
 
 # INCIDENT SUBMISSION — from mobile app
 class IncidentSubmitView(APIView):
