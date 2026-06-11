@@ -242,6 +242,22 @@ class IncidentSubmitView(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class DeviceHistoryView(APIView):
+    
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, device_hash):
+        incidents = Incident.objects.filter(
+            registered_user__phone_hash=device_hash
+        ).order_by('-created_at')
+
+        return Response({
+            'device_hash':   device_hash[:8] + '••••' + device_hash[-4:],
+            'total_reports': incidents.count(),
+            'first_seen':    incidents.last().created_at  if incidents.exists() else None,
+            'last_seen':     incidents.first().created_at if incidents.exists() else None,
+            'incidents':     IncidentSerializer(incidents, many=True).data,
+        })
 
 #  ACKNOWLEDGE — David acknowledges an incident 
 class AcknowledgeIncidentView(APIView):
