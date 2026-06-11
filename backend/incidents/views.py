@@ -201,7 +201,7 @@ class IncidentSubmitView(APIView):
                     color='green',
                     actor='System',
                 )
-                
+
                 
                 
             # Fire SMS alerts if this is a mobile pulse
@@ -244,7 +244,7 @@ class IncidentSubmitView(APIView):
 #  ACKNOWLEDGE — David acknowledges an incident 
 class AcknowledgeIncidentView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-    
+
     def patch(self, request, pk):
         try:
             incident = Incident.objects.get(pk=pk)
@@ -254,19 +254,34 @@ class AcknowledgeIncidentView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        # Mark as acknowledged and record when it happened
+        # Access check
+        user = request.user
+        if user.role == 'FIELD_STAFF':
+            return Response(
+                {'error': 'Only coordinators can acknowledge incidents'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
         incident.is_acknowledged = True
         incident.acknowledged_at = timezone.now()
         incident.save()
 
+        # Add to timeline
+        add_timeline_event(
+            incident=incident,
+            title='Triage completed',
+            description=f'Assigned {incident.severity_level.lower()} priority',
+            color='orange',
+            actor=f'{user.first_name} {user.last_name}'.strip() or user.username,
+        )
+
         return Response(
             {
-                'message': f'Incident {pk} acknowledged.',
-                'acknowledged_at': incident.acknowledged_at
+                'message':         f'Incident {pk} acknowledged.',
+                'acknowledged_at':  incident.acknowledged_at,
             },
             status=status.HTTP_200_OK
         )
-
 
 #  STATS — summary counts for dashboard charts 
 class IncidentStatsView(APIView):
