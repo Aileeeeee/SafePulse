@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import AlertCard from './AlertCard';
 import AlertsModal from './AlertsModal';
+import { INCIDENT_ENDPOINTS } from '../../api/endpoints';
 
 const mapIncidentToAlert = (incident) => ({
   id: incident.id,

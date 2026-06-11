@@ -1,20 +1,20 @@
-export const API_BASE_URL = "https://safepulse-production-4e0d.up.railway.app";
+const API_BASE = import.meta.env.VITE_API_BASE || '';
 
 export const AUTH_ENDPOINTS = {
-  SIGNUP: '/api/auth/signup/',
-  LOGIN: '/api/auth/login/',
-  LOGOUT: '/api/auth/logout/',
-  PROFILE: '/api/auth/profile/',
-  REFRESH: '/api/auth/refresh/',
-  ORG_SEARCH: '/api/auth/organisations/search/',
+  SIGNUP: `${API_BASE}/api/auth/signup/`,
+  LOGIN: `${API_BASE}/api/auth/login/`,
+  LOGOUT: `${API_BASE}/api/auth/logout/`,
+  PROFILE: `${API_BASE}/api/auth/profile/`,
+  REFRESH: `${API_BASE}/api/auth/refresh/`,
+  ORG_SEARCH: `${API_BASE}/api/auth/organisations/search/`,
 };
 
 export const INCIDENT_ENDPOINTS = {
-  LIST: '/api/incidents/',
-  SUBMIT: '/api/incidents/submit/',
-  STATS: '/api/incidents/stats/',
-  ACKNOWLEDGE: (id) => `/api/incidents/${id}/acknowledge/`,
-  DETAIL: (id) => `/api/incidents/${id}/`,
-  DASHBOARD: '/api/incidents/dashboard/',
-  COORDINATOR_DASHBOARD: '/api/incidents/coordinator-dashboard/',
+  LIST: `${API_BASE}/api/incidents/`,
+  SUBMIT: `${API_BASE}/api/incidents/submit/`,
+  STATS: `${API_BASE}/api/incidents/stats/`,
+  ACKNOWLEDGE: (id) => `${API_BASE}/api/incidents/${id}/acknowledge/`,
+  DETAIL: (id) => `${API_BASE}/api/incidents/${id}/`,
+  DASHBOARD: `${API_BASE}/api/incidents/dashboard/`,
+  COORDINATOR_DASHBOARD: `${API_BASE}/api/incidents/coordinator-dashboard/`,
 };

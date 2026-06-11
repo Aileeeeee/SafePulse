@@ -20,12 +20,20 @@ export default function LiveIncidentFeed({ onNewReport, onSelectIncident, search
 
     async function loadIncidents() {
       try {
-        const response = await fetch(INCIDENT_ENDPOINTS.LIST, {
-          signal: controller.signal,
-        });
+        const response = await fetch('/api/incidents/incidents/');
         const data = await response.json();
-        setAllIncidents(data);
-        setFeedItems(data.slice(0, 2).map((inc, i) => ({ ...inc, feedKey: i })));
+
+        const list = (Array.isArray(data) ? data : data.results ?? []).map(inc => ({
+  ...inc,
+  type: inc.incident_type,
+  severity: inc.severity_level,
+  channel: inc.reporting_channel,
+  time: inc.incident_time,
+}));
+
+
+        setAllIncidents(list);
+        setFeedItems(list.slice(0, 2).map((inc, i) => ({ ...inc, feedKey: i })));
       } catch (error) {
         console.error('Failed to fetch incidents:', error);
         setFeedItems(incidents.slice(0, 2).map((inc, i) => ({ ...inc, feedKey: i })));

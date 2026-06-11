@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { X, AlertOctagon, AlertTriangle, MapPin, Clock, ChevronRight } from 'lucide-react';
+import { INCIDENT_ENDPOINTS } from '../../api/endpoints';
 
 const mapIncidentToAlert = (incident) => ({
   id: incident.id,
@@ -72,9 +73,9 @@ export default function AlertsModal({ onClose, alerts = [] }) {
   useEffect(() => {
     const fetchAlerts = async () => {
       try {
-        const res = await fetch('http://127.0.0.1:8000/api/incidents/');
-        if (res.ok) {
-          const data = await res.json();
+        const response = await fetch('/api/incidents/incidents/');
+        if (response.ok) {
+          const data = await response.json();
           const incidents = data.results || data;
           setAllAlerts(incidents.slice(0, 20).map(mapIncidentToAlert));
         }
