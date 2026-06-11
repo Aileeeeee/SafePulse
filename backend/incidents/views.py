@@ -7,7 +7,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
-
+from accounts.permissions import IsCoordinator, IsFieldStaffOrAbove
 from incidents.models import Incident,RegisteredUser, TrustedContact,IncidentAssignment
 from incidents.serializers import IncidentSerializer, IncidentSubmissionSerializer,RegisteredUserSerializer, TrustedContactSerializer
 
@@ -272,6 +272,85 @@ class AssignIncidentView(APIView):
             },
         }, status=status.HTTP_200_OK)
 
+class ConfirmTrustedContactsView(APIView):
+    
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            incident = Incident.objects.get(pk=pk)
+        except Incident.DoesNotExist:
+            return Response(
+                {'error': 'Incident not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        user      = request.user
+        staff_name = f'{user.first_name} {user.last_name}'.strip() or user.username
+
+        add_timeline_event(
+            incident=incident,
+            title='Trusted contact attempted',
+            description='Safe outreach initiated — contacts confirmed notified',
+            color='purple',
+            actor=staff_name,
+        )
+
+        return Response(
+            {'message': 'Trusted contacts confirmed'},
+            status=status.HTTP_200_OK
+        )
+
+class CloseIncidentView(APIView):
+    
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            incident = Incident.objects.get(pk=pk)
+        except Incident.DoesNotExist:
+            return Response(
+                {'error': 'Incident not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        user           = request.user
+        staff_name     = f'{user.first_name} {user.last_name}'.strip() or user.username
+        support        = request.data.get('support_provided', '')
+        notes          = request.data.get('notes', '')
+
+        # Update incident
+        if support:
+            incident.support_provided = support
+        if notes:
+            incident.notes = notes
+        incident.follow_up_status = 'Closed'
+        incident.save()
+
+        # Timeline: support provided
+        if support:
+            add_timeline_event(
+                incident=incident,
+                title='Support provided',
+                description=f'{support} — referral sent to local NGO',
+                color='green',
+                actor=staff_name,
+            )
+
+        # Timeline: case closed
+        add_timeline_event(
+            incident=incident,
+            title='Case closed',
+            description='No further escalation reported',
+            color='green',
+            actor=staff_name,
+        )
+
+        return Response(
+            {'message': 'Case closed successfully'},
+            status=status.HTTP_200_OK
+        )
+
 #  STATS — summary counts for dashboard charts 
 class IncidentStatsView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -306,7 +385,7 @@ class IncidentStatsView(APIView):
             ),
         })
     
-from accounts.permissions import IsCoordinator, IsFieldStaffOrAbove
+
 
 
 class NGODashboardView(APIView):
