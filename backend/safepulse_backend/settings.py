@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 AT_USERNAME = config("AT_USERNAME", default="NOT_FOUND")
-print("AT_USERNAME =", AT_USERNAME)
+
 AT_API_KEY = config("AT_API_KEY")
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -73,6 +73,7 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://safe-pulse-psi.vercel.app",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
