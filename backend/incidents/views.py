@@ -192,6 +192,17 @@ class IncidentSubmitView(APIView):
                     update_fields.append('location_accuracy')
                 update_fields += ['latitude', 'longitude']
                 incident.save(update_fields=update_fields)
+
+                # Create first timeline entry automatically
+                add_timeline_event(
+                    incident=incident,
+                    title='Report received',
+                    description=f'Anonymous report submitted from {incident.location}',
+                    color='green',
+                    actor='System',
+                )
+                
+                
                 
             # Fire SMS alerts if this is a mobile pulse
             is_pulse = (
