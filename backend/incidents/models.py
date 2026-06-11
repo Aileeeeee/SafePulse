@@ -185,7 +185,6 @@ class PulseSession(models.Model):
     def __str__(self):
         return f'PulseSession [{self.phone_hash[:8]}...] — {self.state}'
 
-
 class IncidentTimeline(models.Model):
     """
     Every action taken on an incident creates a timeline entry.
