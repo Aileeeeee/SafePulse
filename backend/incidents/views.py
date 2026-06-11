@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
 
-from incidents.models import Incident,RegisteredUser, TrustedContact
+from incidents.models import Incident,RegisteredUser, TrustedContact,IncidentAssignment
 from incidents.serializers import IncidentSerializer, IncidentSubmissionSerializer,RegisteredUserSerializer, TrustedContactSerializer
 
 def add_timeline_event(incident, title, description='', color='green', actor='System'):
@@ -282,6 +282,85 @@ class AcknowledgeIncidentView(APIView):
             },
             status=status.HTTP_200_OK
         )
+    
+
+class AssignIncidentView(APIView):
+    
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        user = request.user
+
+        if user.role not in ['COORDINATOR', 'ADMIN']:
+            return Response(
+                {'error': 'Only coordinators can assign incidents'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        try:
+            incident = Incident.objects.get(pk=pk)
+        except Incident.DoesNotExist:
+            return Response(
+                {'error': 'Incident not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        assigned_to_id = request.data.get('assigned_to')
+        notes          = request.data.get('notes', '')
+
+        if not assigned_to_id:
+            return Response(
+                {'error': 'assigned_to is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        from accounts.models import NGOUser
+        try:
+            field_staff = NGOUser.objects.get(
+                id=assigned_to_id,
+                role='FIELD_STAFF',
+                organisation=user.organisation,
+            )
+        except NGOUser.DoesNotExist:
+            return Response(
+                {'error': 'Field staff member not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Create or update assignment
+        assignment, created = IncidentAssignment.objects.update_or_create(
+            incident=incident,
+            defaults={
+                'assigned_to': field_staff,
+                'assigned_by': user,
+                'notes':       notes,
+            }
+        )
+
+        # Update incident status
+        incident.follow_up_status = 'Ongoing'
+        incident.save(update_fields=['follow_up_status'])
+
+        # Add to timeline
+        staff_name = f'{field_staff.first_name} {field_staff.last_name}'.strip() or field_staff.username
+        coord_name = f'{user.first_name} {user.last_name}'.strip() or user.username
+
+        add_timeline_event(
+            incident=incident,
+            title='Case assigned',
+            description=f'Assigned to {staff_name} by {coord_name}',
+            color='blue',
+            actor=coord_name,
+        )
+
+        return Response({
+            'message':     f'Incident assigned to {staff_name}',
+            'assigned_to': {
+                'id':         field_staff.id,
+                'name':       staff_name,
+                'username':   field_staff.username,
+            },
+        }, status=status.HTTP_200_OK)
 
 #  STATS — summary counts for dashboard charts 
 class IncidentStatsView(APIView):
