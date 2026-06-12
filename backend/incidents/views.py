@@ -27,37 +27,32 @@ class IncidentListView(ListAPIView):
     permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
-        queryset = Incident.objects.all().order_by('-incident_date', '-incident_time')
+        user = self.request.user
 
-        # Filter by location — e.g. ?location=Lagos
-        location = self.request.query_params.get('location')
-        if location:
-            queryset = queryset.filter(location__icontains=location)
+        if user.role == 'ADMIN':
+            queryset = Incident.objects.all()
 
-        # Filter by incident type — e.g. ?type=Domestic Violence
-        incident_type = self.request.query_params.get('type')
-        if incident_type:
-            queryset = queryset.filter(incident_type=incident_type)
+        elif user.role == 'COORDINATOR' and user.organisation:
+            state = user.organisation.state
+            queryset = Incident.objects.filter(
+                location__icontains=state
+            )
+            if not queryset.exists():
+                city = user.organisation.city
+                queryset = Incident.objects.filter(
+                    location__icontains=city
+                )
 
-        # Filter by severity — e.g. ?severity=Critical
-        severity = self.request.query_params.get('severity')
-        if severity:
-            queryset = queryset.filter(severity_level=severity)
-
-        # Filter by number of days — e.g. ?days=7 returns last 7 days only
-        days = self.request.query_params.get('days')
-        if days:
-            queryset = queryset.filter(
-                incident_date__gte=date.today() - timedelta(days=int(days))
+        elif user.role == 'FIELD_STAFF':
+            # ← Only see incidents assigned to them
+            queryset = Incident.objects.filter(
+                assignment__assigned_to=user
             )
 
-        # Filter by acknowledged status — e.g. ?acknowledged=false
-        acknowledged = self.request.query_params.get('acknowledged')
-        if acknowledged is not None:
-            is_ack = acknowledged.lower() == 'true'
-            queryset = queryset.filter(is_acknowledged=is_ack)
+        else:
+            queryset = Incident.objects.none()
 
-        return queryset
+        return queryset.order_by('-incident_date', '-incident_time')
 
 class IncidentDetailView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -527,16 +522,15 @@ class NGODashboardView(APIView):
 
 
 class CoordinatorDashboardView(APIView):
-    """
-    GET /api/incidents/coordinator-dashboard/
-    Coordinators only — sees all incidents across their state.
-    """
     permission_classes = [IsCoordinator]
 
     def get(self, request):
-        from django.db.models import Count
-        from django.utils import timezone
-        from datetime import timedelta
+        # Block field staff from accessing coordinator dashboard
+        if request.user.role == 'FIELD_STAFF':
+            return Response(
+                {'error': 'Access denied'},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
         state = request.user.organisation.state if request.user.organisation else ''
 
@@ -676,5 +670,46 @@ class TrustedContactDeleteView(APIView):
             return Response(
                 {'error': 'Contact not found'},
                 status=status.HTTP_404_NOT_FOUND
+
             )
 
+class FieldStaffDashboardView(APIView):
+    """
+    GET /api/incidents/field-dashboard/
+    Field staff sees only their assigned incidents.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+
+        if user.role != 'FIELD_STAFF':
+            return Response(
+                {'error': 'Access denied'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Only incidents assigned to this field staff
+        assigned_incidents = Incident.objects.filter(
+            assignment__assigned_to=user
+        ).order_by('-incident_date', '-incident_time')
+
+        # Stats
+        total      = assigned_incidents.count()
+        ongoing    = assigned_incidents.filter(follow_up_status='Ongoing').count()
+        closed     = assigned_incidents.filter(follow_up_status='Closed').count()
+        critical   = assigned_incidents.filter(
+            severity_level='Critical',
+            follow_up_status='Ongoing'
+        ).count()
+
+        return Response({
+            'role':              'FIELD_STAFF',
+            'organisation':      user.organisation_name,
+            'state':             user.organisation.state if user.organisation else '',
+            'total_assigned':    total,
+            'ongoing':           ongoing,
+            'closed':            closed,
+            'critical_ongoing':  critical,
+            'incidents':         IncidentSerializer(assigned_incidents, many=True).data,
+        })
