@@ -23,8 +23,8 @@ def add_timeline_event(incident, title, description='', color='green', actor='Sy
 
 # ── INCIDENT LIST — for dashboard cards ──────────────────────────────────
 class IncidentListView(ListAPIView):
-    serializer_class = IncidentSerializer
-    permission_classes = [permissions.AllowAny]
+    serializer_class   = IncidentSerializer
+    permission_classes = [permissions.IsAuthenticated]  
 
     def get_queryset(self):
         user = self.request.user
