@@ -84,6 +84,15 @@ class Incident(models.Model):
         blank=True,
     )
 
+    registered_user = models.ForeignKey(
+        'RegisteredUser',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='incidents',
+        help_text="The system profile linked to the device hash that triggered this report"
+    )
+
     class Meta:
         ordering = ['-incident_date', '-incident_time']
 
