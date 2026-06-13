@@ -694,3 +694,87 @@ class FieldStaffDashboardView(APIView):
             'critical_ongoing':  assigned_incidents.filter(severity_level='Critical', follow_up_status='Ongoing').count(),
             'incidents':         IncidentSerializer(assigned_incidents, many=True).data,
         })
+
+
+# views.py
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import permissions, status
+from django.db import models
+from .models import Incident
+
+class DynamicActivityLogView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        org = getattr(request.user, 'organisation', None)
+        state = org.state.strip() if org and org.state else ''
+        is_admin = request.user.role == 'ADMIN'
+
+        # 1. Enforce strict isolation bounds
+        if is_admin:
+            queryset = Incident.objects.all()
+        else:
+            if state:
+                queryset = Incident.objects.filter(
+                    models.Q(location__icontains=state) | 
+                    models.Q(local_area__icontains=state)
+                )
+            else:
+                return Response([])
+
+        # Pull the latest 25 activities across your model's pipeline
+        incidents = queryset.order_by('-created_at')[:25]
+        activity_feed = []
+
+        for incident in incidents:
+            # Fallback label string for local areas
+            area = incident.local_area or incident.location or "Unknown Zone"
+            incident_id_str = f"#{incident.id}"
+
+            # ── STATE 1: RECENT INCOMING REPORT LOG ──
+            # Determine visual assets depending on how the pulse landed
+            if incident.reporting_channel in ['Mobile App', 'SMS', 'USSD']:
+                emoji = "🔴"
+                bg = "#fde8e8" # Crimson warning background
+                action = f"New {incident.incident_type} report received via {incident.reporting_channel}"
+            else:
+                emoji = "📝"
+                bg = "#f5f5f5" # Standard log grey
+                action = f"Incident record logged manually via Dashboard"
+
+            activity_feed.append({
+                "emoji": emoji,
+                "bg": bg,
+                "action": action,
+                "highlight": incident_id_str,
+                "meta": f"{incident.incident_type} · {area}",
+                "time": incident.created_at.strftime("%I:%M %p")
+            })
+
+            # ── STATE 2: ACKNOWLEDGEMENT LOG STREAMS ──
+            if incident.is_acknowledged:
+                activity_feed.append({
+                    "emoji": "✅",
+                    "bg": "#e8f2ec", # Sage green background
+                    "action": "Coordinator acknowledged incident operational details",
+                    "highlight": incident_id_str,
+                    "meta": f"Assigned Response Framework · {area}",
+                    # Fallback to current time profile if accurate stamp missing
+                    "time": incident.acknowledged_at.strftime("%I:%M %p") if incident.acknowledged_at else incident.incident_time.strftime("%I:%M %p")
+                })
+
+            # ── STATE 3: RESOLVED STATUS STREAM CLOSURES ──
+            if incident.follow_up_status == 'Closed':
+                activity_feed.append({
+                    "emoji": "🔒",
+                    "bg": "#eaf2fb", # Operational blue
+                    "action": "Case file audited and formally marked as Closed",
+                    "highlight": incident_id_str,
+                    "meta": f"Case Resolved · {incident.support_provided or 'Support Provided'}",
+                    "time": incident.updated_at.strftime("%I:%M %p")
+                })
+
+        # Re-sort combined dynamic history stream chronologically 
+        # (Since adding multiple points per incident throws off database default loops)
+        return Response(activity_feed[:30])
