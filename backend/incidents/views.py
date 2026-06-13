@@ -482,7 +482,10 @@ class CoordinatorDashboardView(APIView):
         state = org.state if org else ''
         org_name = getattr(request.user, 'organisation_name', 'System Admin')
 
-        if request.user.role == 'ADMIN':
+        is_admin = request.user.role == 'ADMIN'
+
+        # Establish base query boundary filter
+        if is_admin:
             qs = Incident.objects.all().order_by('-incident_date', '-incident_time')
         else:
             qs = Incident.objects.filter(location__icontains=state).order_by('-incident_date', '-incident_time')
@@ -497,27 +500,57 @@ class CoordinatorDashboardView(APIView):
         yesterday   = qs.filter(created_at__gte=last_48h, created_at__lt=last_24h).count()
         new_reports_delta = new_reports - yesterday
 
-        # ── 1. CLEAN TOP REPORTED AREAS GENERATION ──────────────────────
-        # Aggregates using the saved clean local areas fields
+        # ── 1. CLEAN TOP REPORTED AREAS GENERATION (COMPOSITE ADMIN AWARE) ──
+        # Group by both local_area and the underlying state (extracted from location or fallback context)
+        # Admins see top 5 to support national scale, coordinators see top 3.
+        limit = 5 if is_admin else 3
+        
+        # We parse the state from the text location field if available
         area_counts = (
             qs.exclude(local_area__isnull=True)
             .exclude(local_area='')
-            .values('local_area')
+            .values('local_area', 'location')
             .annotate(count=Count('id'))
-            .order_by('-count')[:3]
+            .order_by('-count')
         )
-        
-        top_reported_areas = [
-            {"rank": idx + 1, "name": item['local_area'], "count": item['count']}
-            for idx, item in enumerate(area_counts)
-        ]
+
+        top_reported_areas = []
+        seen_composite_keys = set()
+        rank_idx = 1
+
+        for item in area_counts:
+            if len(top_reported_areas) >= limit:
+                break
+                
+            lga = item['local_area']
+            raw_loc = item.get('location', '')
+            
+            # Simple fallback parser to extract state name text out of the location field string
+            inferred_state = raw_loc.split(',')[-1].strip() if ',' in raw_loc else raw_loc
+            if not inferred_state or inferred_state.replace('.', '').isdigit() or len(inferred_state) > 30:
+                inferred_state = state or 'All Zones'
+            
+            # Composite key evaluation isolates duplicate LGA terms across unique states
+            composite_key = f"{lga.lower().strip()}-{inferred_state.lower().strip()}"
+            if composite_key in seen_composite_keys:
+                continue
+                
+            seen_composite_keys.add(composite_key)
+            top_reported_areas.append({
+                "rank": rank_idx,
+                "name": lga,
+                "state": inferred_state, # Used directly by your new frontend UI markup 
+                "count": item['count']
+            })
+            rank_idx += 1
 
         # ── 2. DYNAMIC ACTIVE ALERTS STRUCTURING ────────────────────────
         active_alerts = []
         
-        # Check if any specific area has high traffic in the last 24 hours
         hotspots = (
             qs.filter(created_at__gte=last_24h)
+            .exclude(local_area__isnull=True)
+            .exclude(local_area='')
             .values('local_area')
             .annotate(count=Count('id'))
             .filter(count__gte=2)
@@ -525,11 +558,17 @@ class CoordinatorDashboardView(APIView):
         )
         
         for spot in hotspots:
+            spot_lga = spot['local_area']
+            # Find matching record to get true state location context
+            matched_incident = qs.filter(local_area=spot_lga).first()
+            raw_loc = getattr(matched_incident, 'location', '')
+            spot_state = raw_loc.split(',')[-1].strip() if ',' in raw_loc else (state or 'Nigeria')
+
             active_alerts.append({
-                "id": f"alert-danger-{spot['local_area']}",
+                "id": f"alert-danger-{spot_lga}",
                 "title": "High Risk Area",
                 "description": f"Multiple critical incidents flagged inside this zone recently.",
-                "location": f"{spot['local_area']}, {state or 'Nigeria'}",
+                "location": f"{spot_lga}, {spot_state}",
                 "timeAgo": "40 mins",
                 "type": "danger"
             })
@@ -537,11 +576,14 @@ class CoordinatorDashboardView(APIView):
         # Add general caution notice for active operations
         if qs.filter(follow_up_status='Ongoing').exists():
             recent_ongoing = qs.filter(follow_up_status='Ongoing').first()
+            raw_loc = getattr(recent_ongoing, 'location', '')
+            ongoing_state = raw_loc.split(',')[-1].strip() if ',' in raw_loc else (state or 'Nigeria')
+            
             active_alerts.append({
                 "id": "alert-warning-ongoing",
                 "title": "Multiple Reports",
                 "description": "Several activities requiring verification updates.",
-                "location": f"{getattr(recent_ongoing, 'local_area', 'Active Zones')}, {state or 'Nigeria'}",
+                "location": f"{getattr(recent_ongoing, 'local_area', 'Active Zones')}, {ongoing_state}",
                 "timeAgo": "30 mins",
                 "type": "warning"
             })
@@ -556,7 +598,6 @@ class CoordinatorDashboardView(APIView):
             'critical_ongoing':        qs.filter(severity_level='Critical', follow_up_status='Ongoing').count(),
             'pending_acknowledgement': qs.filter(is_acknowledged=False).count(),
             
-            # Target Dashboard JSON feeds:
             'top_reported_areas':      top_reported_areas,
             'active_alerts':           active_alerts[:3],
             
