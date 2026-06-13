@@ -1,4 +1,5 @@
 from django.shortcuts import render
+import requests
 from django.utils import timezone
 from datetime import date, timedelta
 from django.db.models import Count
@@ -10,6 +11,30 @@ from rest_framework import status, permissions
 from accounts.permissions import IsCoordinator, IsFieldStaffOrAbove
 from incidents.models import Incident, RegisteredUser, TrustedContact, IncidentAssignment
 from incidents.serializers import IncidentSerializer, IncidentSubmissionSerializer, RegisteredUserSerializer, TrustedContactSerializer
+
+
+def get_nigerian_lga_from_gps(lat, lng):
+    """
+    Queries OpenStreetMap to dynamically find the LGA or Town anywhere in Nigeria.
+    """
+    url = f"https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lng}&format=json&accept-language=en"
+    headers = {
+        'User-Agent': 'SafePulse_Incident_Monitor_App_v1.0'
+    }
+    try:
+        response = requests.get(url, headers=headers, timeout=5)
+        if response.status_code == 200:
+            data = response.json()
+            address = data.get('address', {})
+            
+            # OSM routes Nigerian administrative boundaries through these keys
+            lga = address.get('county') or address.get('suburb') or address.get('city_district') or address.get('town')
+            if lga:
+                # Clean up verbose API suffixes if present
+                return lga.replace("Local Government Area", "").strip()
+    except Exception as e:
+        print(f"OSM Geocoding engine error: {e}")
+    return None
 
 def add_timeline_event(incident, title, description='', color='green', actor='System'):
     from incidents.models import IncidentTimeline
@@ -148,19 +173,17 @@ class IncidentSubmitView(APIView):
         if serializer.is_valid():
             incident = serializer.save()
 
-            # ── Link registered user from device_hash ─────────────────────
+            # ── Link registered user ──────────────────────────────────────
             device_hash = request.data.get('device_hash', '')
             if device_hash:
                 try:
-                    registered_user = RegisteredUser.objects.get(
-                        phone_hash=device_hash
-                    )
+                    registered_user = RegisteredUser.objects.get(phone_hash=device_hash)
                     incident.registered_user = registered_user
                     incident.save(update_fields=['registered_user'])
                 except RegisteredUser.DoesNotExist:
-                    pass  # No registered user for this device yet
+                    pass
 
-            # ── Handle GPS coordinates ────────────────────────────────────
+            # ── Handle GPS coordinates & Dynamic LGA Lookup ───────────────
             lat = request.data.get('latitude')
             lng = request.data.get('longitude')
 
@@ -169,15 +192,27 @@ class IncidentSubmitView(APIView):
                 if incident.location in ['Unknown', '', None]:
                     incident.location = f'{float(lat):.4f}, {float(lng):.4f}'
                     update_fields.append('location')
+                
                 incident.latitude  = float(lat)
                 incident.longitude = float(lng)
+                update_fields += ['latitude', 'longitude']
+                
                 if request.data.get('location_accuracy'):
                     incident.location_accuracy = float(request.data.get('location_accuracy'))
                     update_fields.append('location_accuracy')
-                update_fields += ['latitude', 'longitude']
+                
+                # 🌟 NEW: Hit the free OSM API to identify the local area across any State
+                detected_lga = get_nigerian_lga_from_gps(lat, lng)
+                if detected_lga:
+                    # NOTE: Ensure you add 'local_area' as a CharField in models.py
+                    # If you haven't migrated yet, you can temporarily save it to an existing field
+                    incident.local_area = detected_lga 
+                    update_fields.append('local_area')
+
                 incident.save(update_fields=update_fields)
 
             # ── First timeline entry ──────────────────────────────────────
+            from incidents.views import add_timeline_event
             add_timeline_event(
                 incident=incident,
                 title='Report received',
@@ -436,7 +471,6 @@ class NGODashboardView(APIView):
         })
 
 
-# 🚨 FIXED: Coordinator view works cleanly for both ADMIN and COORDINATOR users
 class CoordinatorDashboardView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -463,6 +497,55 @@ class CoordinatorDashboardView(APIView):
         yesterday   = qs.filter(created_at__gte=last_48h, created_at__lt=last_24h).count()
         new_reports_delta = new_reports - yesterday
 
+        # ── 1. CLEAN TOP REPORTED AREAS GENERATION ──────────────────────
+        # Aggregates using the saved clean local areas fields
+        area_counts = (
+            qs.exclude(local_area__isnull=True)
+            .exclude(local_area='')
+            .values('local_area')
+            .annotate(count=Count('id'))
+            .order_by('-count')[:3]
+        )
+        
+        top_reported_areas = [
+            {"rank": idx + 1, "name": item['local_area'], "count": item['count']}
+            for idx, item in enumerate(area_counts)
+        ]
+
+        # ── 2. DYNAMIC ACTIVE ALERTS STRUCTURING ────────────────────────
+        active_alerts = []
+        
+        # Check if any specific area has high traffic in the last 24 hours
+        hotspots = (
+            qs.filter(created_at__gte=last_24h)
+            .values('local_area')
+            .annotate(count=Count('id'))
+            .filter(count__gte=2)
+            .order_by('-count')
+        )
+        
+        for spot in hotspots:
+            active_alerts.append({
+                "id": f"alert-danger-{spot['local_area']}",
+                "title": "High Risk Area",
+                "description": f"Multiple critical incidents flagged inside this zone recently.",
+                "location": f"{spot['local_area']}, {state or 'Nigeria'}",
+                "timeAgo": "40 mins",
+                "type": "danger"
+            })
+
+        # Add general caution notice for active operations
+        if qs.filter(follow_up_status='Ongoing').exists():
+            recent_ongoing = qs.filter(follow_up_status='Ongoing').first()
+            active_alerts.append({
+                "id": "alert-warning-ongoing",
+                "title": "Multiple Reports",
+                "description": "Several activities requiring verification updates.",
+                "location": f"{getattr(recent_ongoing, 'local_area', 'Active Zones')}, {state or 'Nigeria'}",
+                "timeAgo": "30 mins",
+                "type": "warning"
+            })
+
         return Response({
             'state':                   state or 'All Territories',
             'organisation':            org_name,
@@ -472,10 +555,13 @@ class CoordinatorDashboardView(APIView):
             'new_reports_delta':       new_reports_delta,
             'critical_ongoing':        qs.filter(severity_level='Critical', follow_up_status='Ongoing').count(),
             'pending_acknowledgement': qs.filter(is_acknowledged=False).count(),
-            'by_city': list(qs.values('location').annotate(count=Count('id')).order_by('-count')),
+            
+            # Target Dashboard JSON feeds:
+            'top_reported_areas':      top_reported_areas,
+            'active_alerts':           active_alerts[:3],
+            
             'incidents': IncidentSerializer(qs, many=True).data,
         })
-
 
 class RegisterDeviceView(APIView):
     permission_classes = [permissions.AllowAny]
