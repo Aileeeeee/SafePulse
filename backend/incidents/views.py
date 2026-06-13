@@ -99,13 +99,14 @@ class IncidentDetailView(APIView):
                 'status':      'pending',
             })
 
+        # Get trusted contacts from registered user
         trusted_contacts = []
         if incident.registered_user:
             contacts = incident.registered_user.trusted_contacts.all()
             trusted_contacts = [
                 {
                     'name':        c.contact_name,
-                    'relation':    c.relationship or '',
+                    'relation':    c.relationship or 'Contact',
                     'phone':       c.contact_phone,
                     'notified_at': incident.created_at.strftime('%I:%M %p') if incident.created_at else '',
                 }
