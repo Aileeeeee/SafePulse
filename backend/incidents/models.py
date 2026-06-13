@@ -77,6 +77,7 @@ class Incident(models.Model):
     latitude          = models.FloatField(null=True, blank=True)
     longitude         = models.FloatField(null=True, blank=True)
     location_accuracy = models.FloatField(null=True, blank=True)
+    local_area = models.CharField(max_length=255, blank=True, null=True)
     reporter_type     = models.CharField(
         max_length=20,
         choices=[('victim', 'Victim'), ('bystander', 'Bystander')],
