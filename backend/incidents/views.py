@@ -147,15 +147,28 @@ class IncidentSubmitView(APIView):
         if serializer.is_valid():
             incident = serializer.save()
 
+            # ── Link registered user from device_hash ─────────────────────
+            device_hash = request.data.get('device_hash', '')
+            if device_hash:
+                try:
+                    registered_user = RegisteredUser.objects.get(
+                        phone_hash=device_hash
+                    )
+                    incident.registered_user = registered_user
+                    incident.save(update_fields=['registered_user'])
+                except RegisteredUser.DoesNotExist:
+                    pass  # No registered user for this device yet
+
+            # ── Handle GPS coordinates ────────────────────────────────────
             lat = request.data.get('latitude')
             lng = request.data.get('longitude')
-            
+
             if lat and lng:
                 update_fields = []
                 if incident.location in ['Unknown', '', None]:
                     incident.location = f'{float(lat):.4f}, {float(lng):.4f}'
                     update_fields.append('location')
-                incident.latitude = float(lat)
+                incident.latitude  = float(lat)
                 incident.longitude = float(lng)
                 if request.data.get('location_accuracy'):
                     incident.location_accuracy = float(request.data.get('location_accuracy'))
@@ -163,14 +176,16 @@ class IncidentSubmitView(APIView):
                 update_fields += ['latitude', 'longitude']
                 incident.save(update_fields=update_fields)
 
-                add_timeline_event(
-                    incident=incident,
-                    title='Report received',
-                    description=f'Anonymous report submitted from {incident.location}',
-                    color='green',
-                    actor='System',
-                )
+            # ── First timeline entry ──────────────────────────────────────
+            add_timeline_event(
+                incident=incident,
+                title='Report received',
+                description=f'Anonymous report submitted from {incident.location}',
+                color='green',
+                actor='System',
+            )
 
+            # ── Fire SMS pulse if critical mobile app report ──────────────
             is_pulse = (
                 request.data.get('severity_level') == 'Critical' and
                 request.data.get('reporting_channel') == 'Mobile App'
@@ -183,14 +198,14 @@ class IncidentSubmitView(APIView):
                     if lat and lng:
                         landmark = f'GPS: {float(lat):.4f}, {float(lng):.4f} — {incident.location}'
                     dispatch_pulse(
-                        phone_hash=request.data.get('device_hash', ''),
+                        phone_hash=device_hash,
                         zone=incident.location,
                         landmark=landmark,
                         carrier='Mobile App',
                         location_confidence='HIGH' if lat and lng else 'LOW',
                         location_source='GPS' if lat and lng else 'UNKNOWN',
                         network_code='',
-                        skip_incident_creation=True, 
+                        skip_incident_creation=True,
                     )
                 except Exception as e:
                     print(f'Mobile pulse dispatch error: {e}')
