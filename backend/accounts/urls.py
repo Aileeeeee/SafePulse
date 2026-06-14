@@ -11,4 +11,5 @@ urlpatterns = [
     path('organisations/search/', views.OrganisationSearchView.as_view()),
     path('username-suggestions/', views.UsernameAvailabilityView.as_view()),
     path('team/', views.TeamListView.as_view()),
+    path('request-access/', views.RequestAccessView.as_view()),
 ]
