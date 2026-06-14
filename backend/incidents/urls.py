@@ -17,6 +17,6 @@ urlpatterns = [
     path('contacts/',                                views.TrustedContactListCreateView.as_view()),
     path('contacts/<int:pk>/',                       views.TrustedContactDeleteView.as_view()),
     path('device/<str:device_hash>/',                views.DeviceHistoryView.as_view()),
-    path('field-dashboard/', views.FieldStaffDashboardView.as_view()),
-    path('activity-log/', DynamicActivityLogView.as_view(), name='dynamic-activity-log'),
+    path('field-dashboard/',                         views.FieldStaffDashboardView.as_view()),
+    path('activity-log/',                            views.DynamicActivityLogView.as_view()),
 ]
