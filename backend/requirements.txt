@@ -1,4 +1,4 @@
-﻿africastalking==2.0.2
+africastalking==2.0.2
 anyio==4.13.0
 asgiref==3.11.1
 attrs==26.1.0
@@ -10,7 +10,7 @@ dj-database-url==3.1.2
 Django==5.2.15
 django-cors-headers==4.9.0
 djangorestframework==3.17.1
-djangorestframework-simplejwt
+djangorestframework_simplejwt==5.5.1
 drf-spectacular==0.29.0
 gunicorn==26.0.0
 h11==0.16.0
@@ -33,6 +33,7 @@ responses==0.26.0
 rpds-py==0.30.0
 schema==0.7.8
 sqlparse==0.5.5
+typing_extensions==4.15.0
 tzdata==2026.2
 uritemplate==4.2.0
 urllib3==2.7.0
