@@ -82,6 +82,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "https://safe-pulse-psi.vercel.app",
+    "https://safe-pulse-g722.vercel.app",
+    
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -89,6 +91,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://localhost:3000',
     'http://localhost:3000',
     'https://safe-pulse-psi.vercel.app',
+    'https://safe-pulse-g722.vercel.app',
 ]
 CORS_ALLOW_METHODS = [
     "DELETE",
