@@ -10,11 +10,11 @@ export const AUTH_ENDPOINTS = {
 };
 
 export const INCIDENT_ENDPOINTS = {
-  LIST: `${API_BASE}/api/incidents/`,
-  SUBMIT: `${API_BASE}/api/incidents/submit/`,
-  STATS: `${API_BASE}/api/incidents/stats/`,
-  ACKNOWLEDGE: (id) => `${API_BASE}/api/incidents/${id}/acknowledge/`,
-  DETAIL: (id) => `${API_BASE}/api/incidents/${id}/`,
+  LIST: `${API_BASE}/api/incidents/incidents/`,
+  SUBMIT: `${API_BASE}/api/incidents/incidents/submit/`,
+  STATS: `${API_BASE}/api/incidents/incidents/stats/`,
+  ACKNOWLEDGE: (id) => `${API_BASE}/api/incidents/incidents/${id}/acknowledge/`,
+  DETAIL: (id) => `${API_BASE}/api/incidents/incidents/${id}/`,
   DASHBOARD: `${API_BASE}/api/incidents/dashboard/`,
   COORDINATOR_DASHBOARD: `${API_BASE}/api/incidents/coordinator-dashboard/`,
 };

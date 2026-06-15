@@ -72,7 +72,7 @@ export default function AlertsModal({ onClose, alerts = [] }) {
   useEffect(() => {
     const fetchAlerts = async () => {
       try {
-        const response = await fetch('/api/incidents/incidents/');
+        const response = await fetch('${import.meta.env.VITE_API_BASE}/api/incidents/incidents/');
         if (response.ok) {
           const data = await response.json();
           const incidents = data.results || data;
