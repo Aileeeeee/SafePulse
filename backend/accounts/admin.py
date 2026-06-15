@@ -5,7 +5,7 @@ from .models import NGOUser, Organisation,PartnerRequest
 
 @admin.register(Organisation)
 class OrganisationAdmin(admin.ModelAdmin):
-    list_display = ['name', 'city', 'state', 'phone', 'is_active',created_at]
+    list_display = ['name', 'city', 'state', 'phone', 'is_active','created_at',]
     list_filter = ['state', 'is_active']
     search_fields = ['name', 'city','email']
 
