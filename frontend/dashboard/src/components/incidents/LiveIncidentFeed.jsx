@@ -20,7 +20,7 @@ export default function LiveIncidentFeed({ onNewReport, onSelectIncident, search
 
     async function loadIncidents() {
       try {
-        const response = await fetch('/api/incidents/incidents/');
+        const response = await fetch('${import.meta.env.VITE_API_BASE}/api/incidents/incidents/');
         const data = await response.json();
 
         const list = Array.isArray(data) ? data : data.results ?? [];
