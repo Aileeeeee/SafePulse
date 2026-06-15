@@ -49,7 +49,8 @@ def add_timeline_event(incident, title, description='', color='green', actor='Sy
 # ── INCIDENT LIST ─────────────────────────────────────────────────────────────
 class IncidentListView(ListAPIView):
     serializer_class   = IncidentSerializer
-    permission_classes = [permissions.IsAuthenticated]  
+    # permission_classes = [permissions.IsAuthenticated] 
+    permission_classes = [permissions.AllowAny] 
 
     def get_queryset(self):
         user = self.request.user
