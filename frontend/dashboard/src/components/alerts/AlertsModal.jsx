@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { X, AlertOctagon, AlertTriangle, MapPin, Clock, ChevronRight } from 'lucide-react';
-import { INCIDENT_ENDPOINTS } from '../../api/endpoints';
 
 const mapIncidentToAlert = (incident) => ({
   id: incident.id,
@@ -16,9 +15,9 @@ const mapIncidentToAlert = (incident) => ({
       ? 'medium'
       : 'caution',
   status:
-    incident.follow_up_status === 'Ongoing'
+    incident.status === 'Ongoing'
       ? 'Active'
-      : incident.follow_up_status === 'Closed'
+      : incident.status === 'Closed'
       ? 'In Review'
       : 'Monitoring',
   reportCount: 1,

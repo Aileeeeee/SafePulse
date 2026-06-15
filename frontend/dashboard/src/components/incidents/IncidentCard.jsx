@@ -12,7 +12,7 @@ const typeColor = {
 };
 
 export default function IncidentCard({ incident, isNew, onAcknowledge, onSelect }) {
-  const dotColor = severityDot[incident.severity];
+  const dotColor = severityDot[incident.severity]; 
   const badgeStyle = severityColor[incident.severity];
 
   return (
@@ -45,7 +45,7 @@ export default function IncidentCard({ incident, isNew, onAcknowledge, onSelect 
         </div>
         <div className="flex items-center gap-2 text-sm text-gray-600">
           <MessageSquare size={13} className="text-emerald-400 shrink-0" />
-          <span>Report via {incident.channel === 'Mobile App' ? 'app' : incident.channel.toLowerCase()}</span>
+          <span>Report via {incident.channel === 'Mobile App' ? 'app' : (incident.channel ?? 'unknown').toLowerCase()}</span>
         </div>
       </div>
 
