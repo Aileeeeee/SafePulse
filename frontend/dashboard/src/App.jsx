@@ -18,8 +18,6 @@ const INITIAL_NEW_REPORTS = 12;
 export default function App() {
   const [screen, setScreen] = useState('splash');
 
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-
 
   const [newReports, setNewReports] = useState(INITIAL_NEW_REPORTS);
   const [activeCases] = useState(6);
@@ -72,14 +70,11 @@ if (screen === 'splash') {
     return (
       <RequestAccess
         onSignIn={() => setScreen('signin')}
-        onSubmitted={() => {}}
+        onSubmitted={() => setScreen('signin')}
       />
     );
   }
 
-  if (!isAuthenticated) {
-    return <SignIn onSuccess={() => setIsAuthenticated(true)}/>;
-  }
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden font-sans">
@@ -90,7 +85,7 @@ if (screen === 'splash') {
           searchQuery={searchQuery}
           onSearchChange={handleSearchChange}
           newReportsCount={newReports - INITIAL_NEW_REPORTS + 4}
-          onLogout={() => setIsAuthenticated(false)}
+          onLogout={() => setScreen('signin')}
         />
 
         <main className="flex-1 overflow-y-auto px-6 py-5">
