@@ -42,7 +42,7 @@ export default function Header({ searchQuery, onSearchChange, newReportsCount, o
           </button>
 
           {isOpen && (
-            <div className="absolute right-0 top-10 w-48 bg-white border rounded-lg shadow-lg z-50">
+            <div className="absolute right-0 top-10 w-30 bg-white border rounded-lg shadow-lg z-50">
               <button
                 className="flex items-center w-full gap-2 px-4 py-3 text-left hover:bg-gray-100"
                 onClick={() => console.log("Profile")}

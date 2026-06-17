@@ -22,11 +22,18 @@ export default function ActiveAlerts() {
   const [displayAlerts, setDisplayAlerts] = useState([]);
   const [allModalAlerts, setAllModalAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchAlerts = async () => {
       try {
-        const res = await fetch('http://127.0.0.1:8000/api/incidents/');
+        const res = await fetch(INCIDENT_ENDPOINTS.LIST, {
+           headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+            'Content-Type': 'application/json',
+          }
+        });
+
         if (res.ok) {
           const data = await res.json();
           const incidents = data.results || data;
@@ -36,6 +43,7 @@ export default function ActiveAlerts() {
         }
       } catch (err) {
         console.error('Failed to fetch alerts:', err);
+        setError(err.message);
       } finally {
         setLoading(false);
       }
@@ -46,7 +54,6 @@ export default function ActiveAlerts() {
     return () => clearInterval(interval);
   }, []);
 
-  const allAlerts = loading ? [] : displayAlerts;
 
   return (
     <>
@@ -61,9 +68,16 @@ export default function ActiveAlerts() {
           </button>
         </div>
         <div className="flex flex-col gap-2">
-          {allAlerts.map((alert) => (
-            <AlertCard key={`${alert.id}-${alert.minutesAgo}`} alert={alert} />
-          ))}
+          {error && <p className='text-xs text-red-400'>Error: {error}</p>}
+          {loading ? (
+            <p className="text-xs text-gray-400">Loading alerts...</p>
+          ) : displayAlerts.length === 0 ? (
+            <p className="text-xs text-gray-400">No alerts available</p>
+          ) : (
+            displayAlerts.map((alert) => (
+              <AlertCard key={`${alert.id}-${alert.minutesAgo}`} alert={alert} />
+            ))
+          )}
         </div>
       </div>
 

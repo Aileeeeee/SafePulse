@@ -35,7 +35,7 @@ export default function SplashScreen({ onComplete }) {
             alt="SafePulse Logo" 
             className="w-16 h-16" 
             />
-          <h1 className="text-emerald-950 font-semibold text-4xl">
+          <h1 className="text-emerald-600 font-semibold text-4xl">
             SAFE<span className='text-white font-semibold text-4xl'>PULSE</span>
           </h1>
           <p className="text-white/60 text-xs tracking-[0.3em] uppercase font-semibold">
