@@ -17,7 +17,7 @@ const DashboardIllustration = () => (
     <rect x="70" y="20" width="80" height="12" rx="3" fill="rgba(255,255,255,0.35)"/>
     <rect x="70" y="36" width="55" height="8" rx="3" fill="rgba(255,255,255,0.18)"/>
     {/* Stats cards */}
-    {[70, 138, 206, 274].map((x, i) => (
+    {[70, 138, 206, 274].map((x, ) => (
       <g key={x}>
         <rect x={x} y="56" width="54" height="46" rx="7" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
         <rect x={x + 6} y={62} width="20" height="6" rx="2" fill="rgba(255,255,255,0.25)"/>
@@ -117,14 +117,13 @@ export default function Welcome({ onSignIn, onRequestAccess }) {
           <div className="flex flex-col gap-3">
             <button
               onClick={onSignIn}
-              className="flex items-center justify-center gap-2 w-full py-3.5 rounded-full text-white font-semibold text-sm transition-all duration-200 hover:opacity-90 cursor-pointer active:scale-[0.98]"
-              style={{ background: '#1b4332' }}
+              className="flex items-center justify-center text-white gap-2 w-full py-3.5 rounded-full text-sm border border-gray-300 font-semibold bg-emerald-900 hover:text-white transition-all duration-200 hover:bg-emerald-400 cursor-pointer active:scale-[0.98]"
             >
               Sign in <ArrowRight size={16} />
             </button>
             <button
               onClick={onRequestAccess}
-              className="w-full py-3.5 rounded-full text-gray-800 font-semibold text-sm border border-gray-300 bg-white transition-all duration-200 hover:bg-gray-50 cursor-pointer active:scale-[0.98]"
+              className="w-full py-3.5 rounded-full text-gray-800 font-semibold text-sm border border-gray-300 bg-white hover:text-white transition-all duration-200 hover:bg-emerald-400 cursor-pointer active:scale-[0.98]"
             >
               Request access
             </button>
