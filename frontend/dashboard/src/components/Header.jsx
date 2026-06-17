@@ -1,6 +1,9 @@
-import { Search, Bell } from 'lucide-react';
+import { useState } from 'react';
+import { Search, Bell, ChevronDown, User, LogOut } from 'lucide-react';
 
-export default function Header({ searchQuery, onSearchChange, newReportsCount }) {
+export default function Header({ searchQuery, onSearchChange, newReportsCount, onLogout }) {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
     <header className="h-14 bg-white border-b border-gray-100 flex items-center justify-between px-6 shrink-0">
       <div className="relative w-100">
@@ -23,21 +26,41 @@ export default function Header({ searchQuery, onSearchChange, newReportsCount })
             </span>
           )}
         </button>
-        <div className='flex items-center space-x-3 pl-3 border-l border-slate-200'>
-                    <img
-                    src='https://avatars.githubusercontent.com/u/12345678?v=4'
-                    alt='User Avatar'
-                    className='w-8 h-8 rounded-full ring-2 ring-emerald-500'
-                    />
-                    <div className='hidden md:block'>
-                        <p className='text-sm font-medium text-black-500'>
-                            David
-                        </p>
-                        <p className='text-xs text-slate-500'>
-                            NGO Administrator
-                        </p>
-                    </div>
-                </div>
+
+        <div className="relative flex items-center space-x-3 pl-3 border-l border-slate-200">
+          <img
+            src="https://avatars.githubusercontent.com/u/12345678?v=4"
+            alt="User Avatar"
+            className="w-8 h-8 rounded-full ring-2 ring-emerald-500"
+          />
+          <div className="hidden md:block">
+            <p className="text-sm font-medium text-black-500">David</p>
+            <p className="text-xs text-slate-500">NGO Administrator</p>
+          </div>
+          <button onClick={() => setIsOpen(!isOpen)} className="flex items-center cursor-pointer">
+            <ChevronDown size={18} className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+          </button>
+
+          {isOpen && (
+            <div className="absolute right-0 top-10 w-48 bg-white border rounded-lg shadow-lg z-50">
+              <button
+                className="flex items-center w-full gap-2 px-4 py-3 text-left hover:bg-gray-100"
+                onClick={() => console.log("Profile")}
+              >
+                <User size={18} />
+                Profile
+              </button>
+            
+              <button
+                className="flex items-center w-full gap-2 px-4 py-3 text-left text-red-600 hover:bg-red-50"
+                onClick={onLogout}
+              >
+                <LogOut size={18} />
+                Logout
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );

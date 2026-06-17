@@ -1,5 +1,9 @@
 import { useState, useCallback } from 'react';
 import { FileText, Users, AlertTriangle, ShieldCheck } from 'lucide-react';
+import SplashScreen from './components/auth/SplashScreen';
+import Welcome from './components/auth/Welcome';
+import SignIn from './components/auth/SignIn';
+import RequestAccess from './components/auth/RequestAccess';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import StatsCard from './components/StatsCard';
@@ -10,7 +14,13 @@ import TopReportedAreas from './components/TopReportedAreas';
 
 const INITIAL_NEW_REPORTS = 12;
 
+// Screens: 'splash' | 'welcome' | 'signin' | 'requestaccess' | 'dashboard'
 export default function App() {
+  const [screen, setScreen] = useState('splash');
+
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+
   const [newReports, setNewReports] = useState(INITIAL_NEW_REPORTS);
   const [activeCases] = useState(6);
   const [escalatedCases] = useState(3);
@@ -31,10 +41,45 @@ export default function App() {
     setSearchQuery(value);
   };
 
-  const handleAcknowledgeFromPanel = (id) => {
+  const handleAcknowledgeFromPanel = () => {
     // Close the panel after acknowledging. Feed handles its own acknowledge state.
     setSelectedIncident(null);
   };
+
+if (screen === 'splash') {
+    return <SplashScreen onComplete={() => setScreen('welcome')} />;
+  }
+
+  if (screen === 'welcome') {
+    return (
+      <Welcome
+        onSignIn={() => setScreen('signin')}
+        onRequestAccess={() => setScreen('requestaccess')}
+      />
+    );
+  }
+
+  if (screen === 'signin') {
+    return (
+      <SignIn
+        onSuccess={() => setScreen('dashboard')}
+        onRequestAccess={() => setScreen('requestaccess')}
+      />
+    );
+  }
+
+  if (screen === 'requestaccess') {
+    return (
+      <RequestAccess
+        onSignIn={() => setScreen('signin')}
+        onSubmitted={() => {}}
+      />
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <SignIn onSuccess={() => setIsAuthenticated(true)}/>;
+  }
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden font-sans">
@@ -45,6 +90,7 @@ export default function App() {
           searchQuery={searchQuery}
           onSearchChange={handleSearchChange}
           newReportsCount={newReports - INITIAL_NEW_REPORTS + 4}
+          onLogout={() => setIsAuthenticated(false)}
         />
 
         <main className="flex-1 overflow-y-auto px-6 py-5">
