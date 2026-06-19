@@ -41,13 +41,13 @@ export default function App() {
   const [dashboardIncident, setDashboardIncident] = useState(null);
   const [searchQuery, setSearchQuery]             = useState('');
 
-  // ── Sidebar page change ──────────────────────────────────────────────────────
+  //  Sidebar page change 
   const handlePageChange = (id) => {
     setActivePage(id);
     if (id !== 'incidents') setSelectedIncident(null);
   };
 
-  // ── Auth screens ─────────────────────────────────────────────────────────────
+  //  Auth screens 
   if (screen === 'splash')
     return <SplashScreen onComplete={() => setScreen('welcome')} />;
 
@@ -75,7 +75,7 @@ export default function App() {
       />
     );
 
-  // ── Dashboard shell ───────────────────────────────────────────────────────────
+  //  Dashboard shell 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden font-sans">
       <Sidebar

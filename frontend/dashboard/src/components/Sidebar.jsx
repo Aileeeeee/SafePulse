@@ -11,12 +11,11 @@ const navItems = [
   { id: 'settings',          icon: Settings,       label: 'Settings' },
 ];
 
-// Sidebar receives activePage + onPageChange from App (controlled navigation).
-// isOpen/onClose control the mobile slide-in drawer — ignored on desktop (lg+).
+
 function Sidebar({ activePage, onPageChange, isOpen, onClose }) {
   const handleNavClick = (id) => {
     onPageChange(id);
-    onClose?.(); // auto-close drawer on mobile after picking a page
+    onClose?.(); 
   };
 
   return (
