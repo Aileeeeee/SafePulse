@@ -1,7 +1,7 @@
 import { ArrowLeft, MapPin, Clock, MessageSquare, User } from 'lucide-react';
 import { STATUS_STYLES, SEVERITY_STYLES } from '../../data/incidentData';
 
-{/* Detail row */}
+// Detail row 
 function DetailRow({ icon: Icon, label, value }) {
   return (
     <div className="flex items-start gap-3">
@@ -16,23 +16,34 @@ function DetailRow({ icon: Icon, label, value }) {
   );
 }
 
-{/* Timeline */}
+const TIMELINE_DOT_COLORS = {
+  'Report received':  'bg-green-500 border-green-500',
+  'Triage completed': 'bg-orange-500 border-orange-500',
+  'Case assigned':    'bg-blue-500 border-blue-500',
+  'Support provided': 'bg-green-300 border-green-300',
+  'Case closed':      'bg-green-700 border-green-700',
+};
+
+// Timeline
 function Timeline({ events }) {
   return (
     <div className="relative pl-4">
       {/* Vertical line */}
       <div className="absolute left-1.5 top-2 bottom-2 w-px bg-gray-200" />
       <div className="flex flex-col gap-5">
-        {events.map((ev, i) => (
-          <div key={i} className="flex items-start gap-3 relative">
-            <span className="w-3 h-3 rounded-full border-2 shrink-0 mt-0.5 -ml-4 relative z-10 bg-gray-700 border-gray-700" />
-            <div>
-              <p className="text-xs text-black font-medium">{ev.time}</p>
-              <p className="text-sm font-semibold text-gray-800 mt-0.5">{ev.title}</p>
-              <p className="text-xs text-gray-400 mt-0.5">{ev.desc}</p>
+        {events.map((ev, i) => {
+          const dotColor = TIMELINE_DOT_COLORS[ev.title] || 'bg-gray-700 border-gray-700';
+          return (
+            <div key={i} className="flex items-start gap-3 relative">
+              <span className={`w-3 h-3 rounded-full border-2 shrink-0 mt-0.5 -ml-4 relative z-10 ${dotColor}`} />
+              <div>
+                <p className="text-xs text-black font-medium">{ev.time}</p>
+                <p className="text-sm font-semibold text-gray-800 mt-0.5">{ev.title}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{ev.desc}</p>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -112,7 +123,7 @@ export default function IncidentDetailPage({ incident, onBack }) {
       <div>
         <button
           onClick={onBack}
-          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 transition-colors mb-3"
+          className="flex items-center gap-1.5 text-sm text-black hover:text-emerald-600 transition-colors mb-3"
         >
           <ArrowLeft size={16} /> Incident Details
         </button>
