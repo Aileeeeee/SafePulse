@@ -49,7 +49,7 @@ function Timeline({ events }) {
   );
 }
 
-{/* OpenStreetMap iframe */}
+// OpenStreetMap iframe
 function LocationMap({ lat, lng, label }) {
   // Build an OpenStreetMap embed URL centred on the coordinates
   const zoom = 14;
