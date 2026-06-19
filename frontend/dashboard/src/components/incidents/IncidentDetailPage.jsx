@@ -52,7 +52,6 @@ function Timeline({ events }) {
 // OpenStreetMap iframe
 function LocationMap({ lat, lng, label }) {
   // Build an OpenStreetMap embed URL centred on the coordinates
-  const zoom = 14;
   const src = `https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.03},${lat - 0.02},${lng + 0.03},${lat + 0.02}&layer=mapnik&marker=${lat},${lng}`;
 
   return (
