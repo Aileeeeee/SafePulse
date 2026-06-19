@@ -21281,6 +21281,152 @@ export const incidents = [
   }
 ];
 
+export const INCIDENTS = [
+  {
+    id: '1006',
+    category: 'Child Abuse',
+    area: 'Mushin',
+    time: '12:00 PM',
+    status: 'New',
+    channel: 'SMS',
+    severity: 'Critical',
+    date: '2026-05-23',
+    location: 'Mushin, Lagos',
+    lat: 6.5541,
+    lng: 3.3576,
+    trustedContacts: [
+      { name: 'Amaka', relation: 'Mother', phone: '08123456789', notifiedAt: '12:01 PM' },
+    ],
+    timeline: [
+      { time: '12:00 PM', title: 'Report received', desc: 'Anonymous report submitted from Mushin' },
+      { time: '12:10 PM', title: 'Triage completed', desc: 'Assigned critical priority' },
+    ],
+  },
+  {
+    id: '1005',
+    category: 'Sexual Assault',
+    area: 'Ladipo',
+    time: '11:45 AM',
+    status: 'New',
+    channel: 'App',
+    severity: 'High',
+    date: '2026-05-23',
+    location: 'Ladipo, Lagos',
+    lat: 6.5443,
+    lng: 3.3601,
+    trustedContacts: [
+      { name: 'Taiwo', relation: 'Brother', phone: '08098765432', notifiedAt: '11:46 AM' },
+    ],
+    timeline: [
+      { time: '11:45 AM', title: 'Report received', desc: 'Anonymous report submitted from Ladipo' },
+      { time: '11:55 AM', title: 'Triage completed', desc: 'Assigned high priority' },
+    ],
+  },
+  {
+    id: '1004',
+    category: 'Domestic Violence',
+    area: 'Oshodi',
+    time: '10:40 AM',
+    status: 'Active',
+    channel: 'Web',
+    severity: 'High',
+    date: '2026-05-23',
+    location: 'Oshodi, Lagos',
+    lat: 6.5568,
+    lng: 3.3515,
+    trustedContacts: [
+      { name: 'Ngozi', relation: 'Friend', phone: '07034567890', notifiedAt: '10:42 AM' },
+    ],
+    timeline: [
+      { time: '10:40 AM', title: 'Report received', desc: 'Anonymous report submitted from Oshodi' },
+      { time: '10:50 AM', title: 'Triage completed', desc: 'Assigned high priority' },
+      { time: '11:00 AM', title: 'Case assigned', desc: 'Assigned to NGO' },
+    ],
+  },
+  {
+    id: '1003',
+    category: 'Child Abuse',
+    area: 'Isolo',
+    time: '08:00 AM',
+    status: 'Active',
+    channel: 'SMS',
+    severity: 'High',
+    date: '2026-05-23',
+    location: 'Isolo, Lagos',
+    lat: 6.5124,
+    lng: 3.3108,
+    trustedContacts: [],
+    timeline: [
+      { time: '08:00 AM', title: 'Report received', desc: 'Anonymous report submitted from Isolo' },
+      { time: '08:15 AM', title: 'Triage completed', desc: 'Assigned high priority' },
+      { time: '08:30 AM', title: 'Case assigned', desc: 'Assigned to NGO' },
+    ],
+  },
+  {
+    id: '1002',
+    category: 'Sexual Assault',
+    area: 'Yaba',
+    time: '10:45 AM',
+    status: 'Resolved',
+    channel: 'App',
+    severity: 'Medium',
+    date: '2026-05-23',
+    location: 'Yaba, Lagos',
+    lat: 6.5095,
+    lng: 3.3711,
+    trustedContacts: [
+      { name: 'Funke', relation: 'Cousin', phone: '08156781234', notifiedAt: '10:46 AM' },
+    ],
+    timeline: [
+      { time: '10:45 AM', title: 'Report received', desc: 'Anonymous report submitted from Yaba' },
+      { time: '11:00 AM', title: 'Triage completed', desc: 'Assigned medium priority' },
+      { time: '11:30 AM', title: 'Case assigned', desc: 'Assigned to NGO' },
+      { time: '12:00 PM', title: 'Support provided', desc: 'Referral sent to local NGO' },
+      { time: '01:00 PM', title: 'Case closed', desc: 'No further escalation reported' },
+    ],
+  },
+  {
+    id: '1001',
+    category: 'Harassment',
+    area: 'Yaba',
+    time: '10:30 AM',
+    status: 'Resolved',
+    channel: 'App',
+    severity: 'High',
+    date: '2026-05-23',
+    location: 'Yaba, Lagos',
+    lat: 6.5095,
+    lng: 3.3711,
+    trustedContacts: [
+      { name: 'Kemi', relation: 'Sister', phone: '08147847898', notifiedAt: '10:31 AM' },
+    ],
+    timeline: [
+      { time: '10:30 AM', title: 'Report received',          desc: 'Anonymous report submitted from okota' },
+      { time: '10:45 AM', title: 'Triage completed',         desc: 'Assigned high priority' },
+      { time: '12:15 AM', title: 'Case assigned',            desc: 'Assigned to NGO' },
+      { time: '12:20 AM', title: 'Trusted contact attempted',desc: 'Safe outreach initiated' },
+      { time: '12:50 AM', title: 'Support provided',         desc: 'Referral sent to local NGO' },
+      { time: '02:00 PM', title: 'Case closed',              desc: 'No further escalation reported' },
+    ],
+  },
+];
+
+export const STATUS_STYLES = {
+  New:      { dot: 'bg-red-400',   badge: 'bg-red-50 text-red-500 border border-red-200' },
+  Active:   { dot: 'bg-blue-400',  badge: 'bg-blue-100 text-blue-600 border border-blue-200' },
+  Resolved: { dot: 'bg-teal-400',  badge: 'bg-teal-50 text-teal-600 border border-teal-200' },
+};
+
+export const SEVERITY_STYLES = {
+  Critical: 'bg-red-100 text-red-600 border border-red-200',
+  High:     'bg-orange-50 text-orange-500 border border-orange-200',
+  Medium:   'bg-yellow-50 text-yellow-600 border border-yellow-200',
+  Low:      'bg-green-50 text-green-600 border border-green-200',
+};
+
+export const CATEGORIES = ['All', 'Child Abuse', 'Sexual Assault', 'Domestic Violence', 'Harassment', 'Stalking'];
+export const STATUSES   = ['All', 'New', 'Active', 'Resolved'];
+export const DATES      = ['All', '2026-05-23', '2026-05-22', '2026-05-21'];
 
 export const severityColor = {
   Low: 'bg-emerald-100 text-emerald-700',
