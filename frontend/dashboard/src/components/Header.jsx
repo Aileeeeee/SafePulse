@@ -1,12 +1,23 @@
 import { useState } from 'react';
-import { Search, Bell, ChevronDown, User, LogOut } from 'lucide-react';
+import { Search, Bell, ChevronDown, User, LogOut, Menu } from 'lucide-react';
 
-export default function Header({ searchQuery, onSearchChange, newReportsCount, onLogout }) {
+export default function Header({ searchQuery, onSearchChange, newReportsCount, onLogout, onMenuClick }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   return (
-    <header className="h-14 bg-white border-b border-gray-100 flex items-center justify-between px-6 shrink-0">
-      <div className="relative w-100">
+    <header className="h-14 bg-white border-b border-gray-100 flex items-center justify-between px-3 sm:px-6 shrink-0 gap-2">
+      {/* Hamburger — mobile/tablet only */}
+      <button
+        onClick={onMenuClick}
+        className="lg:hidden p-2 -ml-1 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors shrink-0"
+        aria-label="Open menu"
+      >
+        <Menu size={20} />
+      </button>
+
+      {/* Search — full width on desktop, icon-toggle on mobile */}
+      <div className="hidden sm:block relative w-full max-w-xs lg:max-w-100">
         <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
         <input
           type="text"
@@ -17,7 +28,16 @@ export default function Header({ searchQuery, onSearchChange, newReportsCount, o
         />
       </div>
 
-      <div className="flex items-center gap-4">
+      {/* Mobile search toggle */}
+      <button
+        onClick={() => setMobileSearchOpen((v) => !v)}
+        className="sm:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+        aria-label="Search"
+      >
+        <Search size={18} />
+      </button>
+
+      <div className="flex items-center gap-2 sm:gap-4">
         <button className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors">
           <Bell size={18} className="text-gray-600" />
           {newReportsCount > 0 && (
@@ -27,7 +47,7 @@ export default function Header({ searchQuery, onSearchChange, newReportsCount, o
           )}
         </button>
 
-        <div className="relative flex items-center space-x-3 pl-3 border-l border-slate-200">
+        <div className="relative flex items-center space-x-2 sm:space-x-3 pl-2 sm:pl-3 border-l border-slate-200">
           <img
             src="https://avatars.githubusercontent.com/u/12345678?v=4"
             alt="User Avatar"
@@ -42,15 +62,14 @@ export default function Header({ searchQuery, onSearchChange, newReportsCount, o
           </button>
 
           {isOpen && (
-            <div className="absolute right-0 top-10 w-30 bg-white border rounded-lg shadow-lg z-50">
+            <div className="absolute right-0 top-10 w-32 bg-white border rounded-lg shadow-lg z-50">
               <button
                 className="flex items-center w-full gap-2 px-4 py-3 text-left hover:bg-gray-100"
-                onClick={() => console.log("Profile")}
+                onClick={() => console.log('Profile')}
               >
                 <User size={18} />
                 Profile
               </button>
-            
               <button
                 className="flex items-center w-full gap-2 px-4 py-3 text-left text-red-600 hover:bg-red-50"
                 onClick={onLogout}
@@ -62,6 +81,23 @@ export default function Header({ searchQuery, onSearchChange, newReportsCount, o
           )}
         </div>
       </div>
+
+      {/* Mobile search bar — slides below header when toggled */}
+      {mobileSearchOpen && (
+        <div className="absolute top-14 left-0 right-0 bg-white border-b border-gray-100 px-3 py-2.5 sm:hidden z-30 shadow-sm">
+          <div className="relative">
+            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              autoFocus
+              value={searchQuery}
+              onChange={(e) => onSearchChange?.(e.target.value)}
+              placeholder="Search incidents, locations or reports..."
+              className="w-full pl-9 pr-4 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-transparent placeholder:text-gray-400"
+            />
+          </div>
+        </div>
+      )}
     </header>
   );
 }

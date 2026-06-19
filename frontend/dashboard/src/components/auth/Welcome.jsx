@@ -1,7 +1,5 @@
 import { Radio, ShieldCheck, Users, ArrowRight } from 'lucide-react';
-import logo from '../auth/images/Frame 409.png'
-
-
+import logo from '../auth/images/Frame 409.png';
 
 const features = [
   { icon: Radio, title: 'Live multiple-channel intake', desc: 'Sms, app, and web reports in one feed.' },
@@ -11,38 +9,35 @@ const features = [
 
 export default function Welcome({ onSignIn, onRequestAccess }) {
   return (
-    <div className="flex w-full h-screen overflow-hidden">
-      {/* Left panel */}
+    <div className="flex w-full min-h-screen overflow-y-auto md:overflow-hidden md:h-screen">
+      {/* Left panel — hidden below md, exactly as before */}
       <div
         className="hidden md:flex flex-1 flex-col p-8 relative overflow-hidden"
         style={{ background: '#1b4332' }}
       >
-        {/* Decorative rings */}
         <div className="absolute rounded-full" style={{ width: '420px', height: '420px', border: '1px solid rgba(255,255,255,0.07)', top: '-80px', left: '-100px' }} />
         <div className="absolute rounded-full" style={{ width: '320px', height: '320px', border: '1px solid rgba(255,255,255,0.07)', top: '-30px', left: '-50px' }} />
         <div className="absolute rounded-full" style={{ width: '380px', height: '380px', border: '1px solid rgba(255,255,255,0.05)', bottom: '-80px', right: '-100px' }} />
 
-
-        {/* Illustration card */}
         <div className="relative z-10 flex items-center justify-center flex-1 py-8">
           <div
             className="rounded-2xl overflow-hidden p-4 w-full max-w-sm shadow-2xl"
             style={{ border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.06)' }}
           >
-          <img src={logo} alt="Report" className='w-full h-full' />
+            <img src={logo} alt="Report" className="w-full h-full" />
           </div>
         </div>
       </div>
 
-      {/* Right panel */}
-      <div className="flex flex-1 items-center justify-center px-6 py-10" style={{ background: '#f5f4ef' }}>
-        <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-10">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome to SafePulse</h1>
+      {/* Right panel — responsive padding so it never crowds on small phones */}
+      <div className="flex flex-1 items-center justify-center px-4 sm:px-6 py-8 sm:py-10" style={{ background: '#f5f4ef' }}>
+        <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-6 sm:p-10">
+          <div className="mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Welcome to SafePulse</h1>
             <p className="text-gray-500 text-sm">Monitors incidents, identify patterns, and coordinate response</p>
           </div>
 
-          <div className="flex flex-col gap-3 mb-8">
+          <div className="flex flex-col gap-3 mb-6 sm:mb-8">
             {features.map(({ icon: Icon, title, desc }) => (
               <div
                 key={title}
@@ -75,7 +70,7 @@ export default function Welcome({ onSignIn, onRequestAccess }) {
             </button>
           </div>
 
-          <p className="text-center text-xs text-gray-400 mt-8">
+          <p className="text-center text-xs text-gray-400 mt-6 sm:mt-8">
             For verified NGO and partner organizations only.
           </p>
         </div>
