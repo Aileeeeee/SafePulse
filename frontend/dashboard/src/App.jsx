@@ -17,7 +17,7 @@ import IncidentDetailPage from './components/incidents/IncidentDetailPage';
 const INITIAL_NEW_REPORTS = 12;
 
 // Auth screens: 'splash' | 'welcome' | 'signin' | 'requestaccess'
-// Dashboard sections: 'dashboard' | 'incidents' | 'reports' | ...
+// Dashboard sections: 'dashboard' | 'incidents' | 'reports' | 
 export default function App() {
   const [screen, setScreen] = useState('splash');
 
@@ -173,7 +173,7 @@ export default function App() {
           {/* ── Placeholder pages ── */}
           {!['dashboard', 'incidents'].includes(activePage) && (
             <div className="flex items-center justify-center h-full text-gray-400 text-sm px-4 text-center">
-              {activePage.charAt(0).toUpperCase() + activePage.slice(1).replace('-', ' ')} — coming soon
+              {activePage.charAt(0).toUpperCase() + activePage.slice(1).replace('-', ' ')} — coming soon!!
             </div>
           )}
 
