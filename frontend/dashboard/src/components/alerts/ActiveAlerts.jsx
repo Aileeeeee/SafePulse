@@ -26,21 +26,28 @@ export default function ActiveAlerts() {
 
   useEffect(() => {
     const fetchAlerts = async () => {
+      const token = localStorage.getItem('access_token');
+      if (!token) return;
+
       try {
         const res = await fetch(INCIDENT_ENDPOINTS.LIST, {
            headers: {
-            'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           }
         });
 
-        if (res.ok) {
-          const data = await res.json();
-          const incidents = data.results || data;
-          const alerts = incidents.map(mapIncidentToAlert);
-          setDisplayAlerts(alerts.slice(0, 5));
-          setAllModalAlerts(alerts);
+        if (!res.ok) {
+         throw new Error(`HTTP ${res.status}`);
         }
+
+        const data = await res.json();
+        const incidents = data.results || data;
+        const alerts = incidents.map(mapIncidentToAlert);
+        setDisplayAlerts(alerts.slice(0, 5));
+        setAllModalAlerts(alerts);
+
+        
       } catch (err) {
         console.error('Failed to fetch alerts:', err);
         setError(err.message);

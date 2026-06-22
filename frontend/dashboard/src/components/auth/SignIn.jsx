@@ -29,24 +29,41 @@ export default function SignIn({ onSuccess, onRequestAccess }) {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setAuthError('');
-    const fieldErrors = validate({ email, password });
-    if (Object.keys(fieldErrors).length > 0) {
-      setErrors(fieldErrors);
+  e.preventDefault();
+  setAuthError('');
+  const fieldErrors = validate({ email, password });
+  if (Object.keys(fieldErrors).length > 0) {
+    setErrors(fieldErrors);
+    return;
+  }
+  setErrors({});
+  setLoading(true);
+
+  try {
+    const res = await fetch('/api/auth/login/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      setAuthError(data.detail || 'Invalid credentials. Please check your email and password.');
       return;
     }
-    setErrors({});
-    setLoading(true);
-    await new Promise((r) => setTimeout(r, 900));
+
+    // Save tokens to localStorage
+    localStorage.setItem('access_token', data.access);
+    localStorage.setItem('refresh_token', data.refresh);
+
+    onSuccess?.();
+  } catch (_err) {
+    setAuthError('Something went wrong. Please try again.');
+  } finally {
     setLoading(false);
-    // Demo: any @ngo.org email succeeds
-    if (email.toLowerCase().endsWith('@ngo.org')) {
-      onSuccess?.();
-    } else {
-      setAuthError('Invalid credentials. Please check your email and password.');
-    }
-  };
+  }
+};
 
   const focusStyle = { borderColor: '#1b4332', boxShadow: '0 0 0 3px rgba(27,67,50,0.12)' };
   const blurStyle = { borderColor: '#e5e7eb', boxShadow: 'none' };

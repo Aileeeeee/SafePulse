@@ -11,20 +11,21 @@ import LiveIncidentFeed from './components/incidents/LiveIncidentFeed';
 import IncidentDetailPanel from './components/incidents/IncidentDetailPanel';
 import ActiveAlerts from './components/alerts/ActiveAlerts';
 import TopReportedAreas from './components/TopReportedAreas';
-
-// ── New incident pages ─────────────────────────────────────────────────────────
 import IncidentsPage from './components/incidents/IncidentsPage';
 import IncidentDetailPage from './components/incidents/IncidentDetailPage';
 
 const INITIAL_NEW_REPORTS = 12;
 
 // Auth screens: 'splash' | 'welcome' | 'signin' | 'requestaccess'
-// Dashboard sections: 'dashboard' | 'incidents' | 'incident-detail' | 'reports' | ...
+// Dashboard sections: 'dashboard' | 'incidents' | 'reports' | 
 export default function App() {
   const [screen, setScreen] = useState('splash');
 
   // Dashboard sidebar page
   const [activePage, setActivePage] = useState('dashboard');
+
+  // Mobile sidebar drawer open/closed
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Incident selected from the Incidents table
   const [selectedIncident, setSelectedIncident] = useState(null);
@@ -40,14 +41,13 @@ export default function App() {
   const [dashboardIncident, setDashboardIncident] = useState(null);
   const [searchQuery, setSearchQuery]             = useState('');
 
-  // ── Sidebar page change ──────────────────────────────────────────────────────
+  //  Sidebar page change 
   const handlePageChange = (id) => {
     setActivePage(id);
-    // Clear incident detail when switching away
     if (id !== 'incidents') setSelectedIncident(null);
   };
 
-  // ── Auth screens ─────────────────────────────────────────────────────────────
+  //  Auth screens 
   if (screen === 'splash')
     return <SplashScreen onComplete={() => setScreen('welcome')} />;
 
@@ -75,17 +75,23 @@ export default function App() {
       />
     );
 
-  // ── Dashboard shell ───────────────────────────────────────────────────────────
+  //  Dashboard shell 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden font-sans">
-      <Sidebar activePage={activePage} onPageChange={handlePageChange} />
+      <Sidebar
+        activePage={activePage}
+        onPageChange={handlePageChange}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
 
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         <Header
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           newReportsCount={newReports - INITIAL_NEW_REPORTS + 4}
           onLogout={() => setScreen('signin')}
+          onMenuClick={() => setSidebarOpen(true)}
         />
 
         <main className="flex-1 overflow-y-auto">
@@ -107,13 +113,14 @@ export default function App() {
 
           {/* ── Dashboard (default) ── */}
           {activePage === 'dashboard' && (
-            <div className="px-6 py-5">
+            <div className="px-4 sm:px-6 py-5">
               <div className="mb-6">
-                <h1 className="text-2xl font-bold text-gray-900">Welcome back, David!</h1>
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Welcome back, David!</h1>
                 <p className="text-sm text-gray-500 mt-1">Here's what is happening in your community right now.</p>
               </div>
 
-              <div className="grid grid-cols-4 gap-4 mb-6">
+              {/* Stats — 1 col mobile, 2 col tablet, 4 col desktop */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
                 <StatsCard
                   title="New Reports" value={newReports} delta={5}
                   deltaLabel="From yesterday"
@@ -139,8 +146,9 @@ export default function App() {
                 />
               </div>
 
-              <div className="grid grid-cols-5 gap-5">
-                <div className="col-span-3">
+              {/* Feed + sidebar widgets — stacked on mobile/tablet, 5-col split on desktop */}
+              <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+                <div className="lg:col-span-3">
                   <LiveIncidentFeed
                     onNewReport={handleNewReport}
                     onSelectIncident={setDashboardIncident}
@@ -154,7 +162,7 @@ export default function App() {
                     />
                   )}
                 </div>
-                <div className="col-span-2 flex flex-col gap-0">
+                <div className="lg:col-span-2 flex flex-col gap-0">
                   <ActiveAlerts />
                   <TopReportedAreas />
                 </div>
@@ -164,8 +172,8 @@ export default function App() {
 
           {/* ── Placeholder pages ── */}
           {!['dashboard', 'incidents'].includes(activePage) && (
-            <div className="flex items-center justify-center h-full text-gray-400 text-sm">
-              {activePage.charAt(0).toUpperCase() + activePage.slice(1).replace('-', ' ')} — coming soon
+            <div className="flex items-center justify-center h-full text-gray-400 text-sm px-4 text-center">
+              {activePage.charAt(0).toUpperCase() + activePage.slice(1).replace('-', ' ')} — coming soon!!
             </div>
           )}
 

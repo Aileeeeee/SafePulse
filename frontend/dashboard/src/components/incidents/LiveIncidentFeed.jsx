@@ -20,9 +20,21 @@ export default function LiveIncidentFeed({ onNewReport, onSelectIncident, search
 
     async function loadIncidents() {
       try {
-        const response = await fetch('${import.meta.env.VITE_API_BASE}/api/incidents/incidents/');
-        const data = await response.json();
+        const token = localStorage.getItem('access_token');
+        if (!token) return;
 
+        const response = await fetch(INCIDENT_ENDPOINTS.LIST, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`)
+        }
+
+        const data = await response.json();
         const list = Array.isArray(data) ? data : data.results ?? [];
 
 
