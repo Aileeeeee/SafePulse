@@ -169,3 +169,29 @@ class UsernameAvailabilityView(APIView):
                 break
 
         return Response({'suggestions': suggestions})
+
+class TeamListView(APIView):
+    """
+    GET /api/auth/team/
+    Returns field staff in the same organisation as the coordinator.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+
+        if user.role == 'ADMIN':
+            # Admin sees everyone
+            from accounts.models import NGOUser
+            team = NGOUser.objects.exclude(id=user.id)
+        elif user.role == 'COORDINATOR' and user.organisation:
+            from accounts.models import NGOUser
+            team = NGOUser.objects.filter(
+                organisation=user.organisation,
+                role='FIELD_STAFF',
+            ).exclude(id=user.id)
+        else:
+            return Response([], status=status.HTTP_200_OK)
+
+        from accounts.serializers import UserProfileSerializer
+        return Response(UserProfileSerializer(team, many=True).data)

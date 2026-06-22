@@ -32,6 +32,29 @@ class Organisation(models.Model):
     def __str__(self):
         return f'{self.name} — {self.city}, {self.state}'
 
+# accounts/models.py
+from django.db import models
+
+class PartnerRequest(models.Model):
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('APPROVED', 'Approved'),
+        ('REJECTED', 'Rejected')
+    ]
+    
+    organisation_name = models.CharField(max_length=250)
+    organisation_address = models.TextField()
+    email = models.EmailField()
+    contact_person = models.CharField(max_length=200)
+    region = models.CharField(max_length=100)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='PENDING')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.organisation_name} ({self.region}) - {self.status}"
 
 class NGOUser(AbstractUser):
 

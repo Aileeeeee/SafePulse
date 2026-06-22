@@ -1,7 +1,8 @@
 {
-    "cSpell.words": [
-        "oshodi",
-        "requestaccess",
-        "safepulse"
-    ]
+  "cSpell.words": [
+    "oshodi",
+    "requestaccess",
+    "safepulse"
+  ],
+  "python-envs.defaultEnvManager": "ms-python.python:system"
 }
