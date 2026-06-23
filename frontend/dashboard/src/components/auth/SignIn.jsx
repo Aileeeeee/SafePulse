@@ -20,10 +20,10 @@ function validate({ email, password }) {
 }
 
 export default function SignIn({ onSuccess, onRequestAccess }) {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(() => localStorage.getItem('remembered_email') || '');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
+  const [rememberMe, setRememberMe] = useState(() => !!localStorage.getItem('remembered_email'));
   const [errors, setErrors] = useState({});
   const [authError, setAuthError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -43,7 +43,7 @@ export default function SignIn({ onSuccess, onRequestAccess }) {
     const res = await fetch('/api/auth/login/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ username: email, password }),
     });
 
     const data = await res.json();
@@ -57,8 +57,16 @@ export default function SignIn({ onSuccess, onRequestAccess }) {
     localStorage.setItem('access_token', data.access);
     localStorage.setItem('refresh_token', data.refresh);
 
+    // Save or clear remembered email
+    if (rememberMe) {
+      localStorage.setItem('remembered_email', email);
+    } else {
+      localStorage.removeItem('remembered_email');
+    }
+
     onSuccess?.();
   } catch (_err) {
+    console.error('Login error;', _err);
     setAuthError('Something went wrong. Please try again.');
   } finally {
     setLoading(false);
@@ -118,13 +126,13 @@ export default function SignIn({ onSuccess, onRequestAccess }) {
               {authError}
             </div>
           )}
-
+          {/*
           <div className="mb-5 px-4 py-3 rounded-xl text-sm bg-emerald-50 border border-emerald-200">
             <p className="text-emerald-800 font-medium">Demo credentials:</p>
             <p className="text-emerald-700 mt-1">Email: <code className="bg-emerald-100 px-1.5 py-0.5 rounded">demo@ngo.org</code></p>
             <p className="text-emerald-700">Password: <code className="bg-emerald-100 px-1.5 py-0.5 rounded">demo123</code></p>
           </div>
-
+            */}
           <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
             <div>
               <label className="block text-sm font-medium text-gray-800 mb-1.5">Email address</label>
