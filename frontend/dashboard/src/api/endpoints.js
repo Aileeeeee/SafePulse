@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_BASE;
+const API_BASE = import.meta.env.VITE_API_BASE || 'https://safepulse-production-4e0d.up.railway.app';
 
 export const AUTH_ENDPOINTS = {
   SIGNUP: `${API_BASE}/api/auth/signup/`,
