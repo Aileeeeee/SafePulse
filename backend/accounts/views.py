@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.db.models import Q
 from .serializers import SignupSerializer, UserProfileSerializer,OrganisationSerializer
 from .models import Organisation
 
@@ -35,31 +36,43 @@ class SignupView(APIView):
         print("SERIALIZER ERRORS:", serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
-        username = request.data.get('username')
-        password = request.data.get('password')
+        login_field = request.data.get('username') or request.data.get('email')
+        password    = request.data.get('password')
 
-        if not username or not password:
+        if not login_field or not password:
             return Response(
-                {'error': 'Username and password are required.'},
+                {'error': 'Username or email and password are required.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        user = authenticate(username=username, password=password)
+        # Find user by username OR email
+        try:
+            user_obj = User.objects.get(
+                Q(username=login_field) | Q(email=login_field)
+            )
+        except User.DoesNotExist:
+            return Response(
+                {'error': 'Invalid credentials.'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        # Verify password
+        user = authenticate(username=user_obj.username, password=password)
 
         if user:
-            # 3. Use SimpleJWT tokens
-            tokens = get_tokens_for_user(user)
+            token, _ = Token.objects.get_or_create(user=user)
             return Response({
-                'tokens': tokens,
+                'token': token.key,
                 'user': UserProfileSerializer(user).data,
             }, status=status.HTTP_200_OK)
 
         return Response(
-            {'error': 'Invalid username or password.'},
+            {'error': 'Invalid credentials.'},
             status=status.HTTP_401_UNAUTHORIZED
         )
 
