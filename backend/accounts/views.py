@@ -3,7 +3,6 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.authtoken.models import Token
 from django.db.models import Q
 from .serializers import SignupSerializer, UserProfileSerializer,OrganisationSerializer
 from .models import Organisation
@@ -66,9 +65,12 @@ class LoginView(APIView):
         user = authenticate(username=user_obj.username, password=password)
 
         if user:
-            token, _ = Token.objects.get_or_create(user=user)
+            # ── FIXED: GENERATE CRYPTOGRAPHIC JWT TOKENS ──
+            refresh = RefreshToken.for_user(user)
+            
             return Response({
-                'token': token.key,
+                'access': str(refresh.access_token),
+                'refresh': str(refresh),
                 'user': UserProfileSerializer(user).data,
             }, status=status.HTTP_200_OK)
 
