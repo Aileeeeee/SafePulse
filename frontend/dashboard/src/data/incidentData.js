@@ -21429,17 +21429,17 @@ export const STATUSES   = ['All', 'New', 'Active', 'Resolved'];
 export const DATES      = ['All', '2026-05-23', '2026-05-22', '2026-05-21'];
 
 export const severityColor = {
-  Low: 'bg-emerald-100 text-emerald-700',
+  Low: 'bg-green-100 text-green-700',
   Medium: 'bg-amber-100 text-amber-700',
-  High: 'bg-orange-100 text-orange-700',
-  Critical: 'bg-red-100 text-red-700',
+  High: 'bg-red-100 text-red-700',
+  Critical: 'bg-orange-100 text-orange-700',
 };
 
 export const severityDot = {
-  Low: 'bg-emerald-500',
+  Low: 'bg-green-500',
   Medium: 'bg-amber-500',
-  High: 'bg-orange-500',
-  Critical: 'bg-red-500',
+  High: 'bg-red-500',
+  Critical: 'bg-orange-500',
 };
 
 export const topLocations = [

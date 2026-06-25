@@ -5,6 +5,15 @@ import { incidents } from '../../data/incidentData';
 
 const FEED_INTERVAL_MS = 4000;
 
+// Maps Django severity_level values to your card's expected values
+function mapSeverity(level) {
+  if (!level) return 'Low';
+  const l = level.toLowerCase();
+  if (l === 'critical' || l === 'high') return 'High';
+  if (l === 'medium') return 'Medium';
+  return 'Low';
+}
+
 export default function LiveIncidentFeed({ onNewReport, onSelectIncident, searchQuery }) {
   const [allIncidents, setAllIncidents] = useState([]);
   const [feedItems, setFeedItems] = useState([]);
@@ -37,9 +46,30 @@ export default function LiveIncidentFeed({ onNewReport, onSelectIncident, search
         const data = await response.json();
         const list = Array.isArray(data) ? data : data.results ?? [];
 
+        const mapped = list.map((inc) => ({
+          ...inc,
+          type: inc.incident_type ?? inc.type ?? 'Unknown',
+          severity: mapSeverity(inc.severity_level ?? inc.severity),
+          time: inc.reported_at
+            ? new Date(inc.reported_at).toLocaleString('en-GB', {
+                day: 'numeric', month: 'short',
+                hour: '2-digit', minute: '2-digit',
+              })
+            : inc.time ?? 'Unknown time',
+          location: inc.location ?? 'Unknown location',
+          channel: inc.channel ?? 'Unknown',
+        }));
 
-        setAllIncidents(list);
-        setFeedItems(list.slice(0, 2).map((inc, i) => ({ ...inc, feedKey: i })));
+        const sorted = mapped.sort((a, b) => {
+          if (a.reported_at && b.reported_at) {
+            return new Date(b.reported_at) - new Date(a.reported_at);
+          }
+          return b.id - a.id;
+        });
+
+
+        setAllIncidents(sorted);
+        setFeedItems(sorted.slice(0, 2).map((inc, i) => ({ ...inc, feedKey: i })));
       } catch (error) {
         console.error('Failed to fetch incidents:', error);
         setFeedItems(incidents.slice(0, 2).map((inc, i) => ({ ...inc, feedKey: i })));

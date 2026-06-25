@@ -73,7 +73,7 @@ export default function IncidentsPage({ onSelectIncident }) {
       {/* Heading */}
       <div>
         <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Incidents</h1>
-        <p className="text-sm text-gray-400 mt-0.5">Manage all reported incidents</p>
+        <p className="text-sm text-gray-600 mt-0.5">Manage all reported incidents</p>
       </div>
 
       {/* Filters — wrap on small screens */}
