@@ -1,18 +1,18 @@
 import { MapPinned, Clock, MessageSquare } from 'lucide-react';
 import { severityColor, severityDot } from '../../data/incidentData';
 
-const typeColor = {
-  'Violence/Assault': 'text-black-700',
-  'Harassment': 'text-black-700',
-  'Sexual Harassment': 'text-black-700',
-  'Child Abuse': 'text-black-700',
-  'Sexual Assault': 'text-black-700',
-  'Domestic Violence': 'text-black-700',
-  'Stalking': 'text-black-700',
+const typeDot = {
+  'Violence/Assault': 'bg-gray-500',
+  'Harassment': 'bg-orange-400',
+  'Sexual Harassment': 'bg-red-500',
+  'Child Abuse': 'bg-blue-500',
+  'Sexual Assault': 'bg-red-600',
+  'Domestic Violence': 'bg-red-900',   // ✅ fixed from rose-950 (was bleeding into text)
+  'Stalking': 'bg-purple-600',
 };
 
 export default function IncidentCard({ incident, isNew, onAcknowledge, onSelect }) {
-  const dotColor = severityDot[incident.severity]; 
+  const dotColor = typeDot[incident.type] ?? severityDot[incident.severity];
   const badgeStyle = severityColor[incident.severity];
 
   return (
@@ -27,7 +27,7 @@ export default function IncidentCard({ incident, isNew, onAcknowledge, onSelect 
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-2">
           <span className={`w-2.5 h-2.5 rounded-full ${dotColor} shrink-0 mt-0.5`} />
-          <h3 className={`font-bold text-base ${typeColor[incident.type] || 'text-gray-800'}`}>
+          <h3 className="font-bold text-base text-gray-800"> {/* ✅ fixed — was using typeDot (bg class) as text class */}
             {incident.type}
           </h3>
         </div>
@@ -51,7 +51,7 @@ export default function IncidentCard({ incident, isNew, onAcknowledge, onSelect 
 
       <div className="flex items-center justify-between">
         <span className={`text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5 ${badgeStyle}`}>
-          <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
+          <span className={`w-1.5 h-1.5 rounded-full ${severityDot[incident.severity]}`} /> {/* ✅ fixed — badge dot uses severityDot, not typeDot */}
           {incident.severity} risk
         </span>
         <button

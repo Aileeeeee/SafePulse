@@ -44,7 +44,7 @@ export default function ActiveAlerts() {
         const data = await res.json();
         const incidents = data.results || data;
         const alerts = incidents.map(mapIncidentToAlert);
-        setDisplayAlerts(alerts.slice(0, 5));
+        setDisplayAlerts(alerts.slice(0, 3));
         setAllModalAlerts(alerts);
 
         

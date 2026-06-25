@@ -16,10 +16,21 @@ import IncidentDetailPage from './components/incidents/IncidentDetailPage';
 
 const INITIAL_NEW_REPORTS = 12;
 
+const getInitialScreen = () => {
+  const token = localStorage.getItem('access_token');
+  if (token) return 'dashboard';
+
+
+const lastScreen = sessionStorage.getItem('currentScreen');
+if (lastScreen) return lastScreen;
+
+return 'splash'
+};
+
 // Auth screens: 'splash' | 'welcome' | 'signin' | 'requestaccess'
 // Dashboard sections: 'dashboard' | 'incidents' | 'reports' | 
 export default function App() {
-  const [screen, setScreen] = useState('splash');
+  const [screen, setScreen] = useState(getInitialScreen);
 
   // Dashboard sidebar page
   const [activePage, setActivePage] = useState('dashboard');
@@ -41,6 +52,19 @@ export default function App() {
   const [dashboardIncident, setDashboardIncident] = useState(null);
   const [searchQuery, setSearchQuery]             = useState('');
 
+
+  const handleSetScreen = (s) => {
+    sessionStorage.setItem('currentScreen', s);
+    setScreen(s);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('currentScreen');
+    setScreen('signin');
+  };
+
   //  Sidebar page change 
   const handlePageChange = (id) => {
     setActivePage(id);
@@ -49,29 +73,33 @@ export default function App() {
 
   //  Auth screens 
   if (screen === 'splash')
-    return <SplashScreen onComplete={() => setScreen('welcome')} />;
+    return (
+      <SplashScreen onComplete={() => {
+        handleSetScreen('welcome');
+      }} />
+  );
 
   if (screen === 'welcome')
     return (
       <Welcome
-        onSignIn={() => setScreen('signin')}
-        onRequestAccess={() => setScreen('requestaccess')}
+        onSignIn={() => handleSetScreen('signin')}
+        onRequestAccess={() => handleSetScreen('requestaccess')}
       />
     );
 
   if (screen === 'signin')
     return (
       <SignIn
-        onSuccess={() => setScreen('dashboard')}
-        onRequestAccess={() => setScreen('requestaccess')}
+        onSuccess={() => handleSetScreen('dashboard')}
+        onRequestAccess={() => handleSetScreen('requestaccess')}
       />
     );
 
   if (screen === 'requestaccess')
     return (
       <RequestAccess
-        onSignIn={() => setScreen('signin')}
-        onWelcome={() => setScreen('welcome')}
+        onSignIn={() => handleSetScreen('signin')}
+        onWelcome={() => handleSetScreen('welcome')}
       />
     );
 
@@ -90,7 +118,7 @@ export default function App() {
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           newReportsCount={newReports - INITIAL_NEW_REPORTS + 4}
-          onLogout={() => setScreen('signin')}
+          onLogout={handleLogout}
           onMenuClick={() => setSidebarOpen(true)}
         />
 
@@ -134,7 +162,7 @@ export default function App() {
                   iconBg="bg-blue-100" trend="up"
                 />
                 <StatsCard
-                  title="Escalated Cases" value={escalatedCases} delta={2}
+                  title="Escalated Cases" value={escalatedCases} delta={0}
                   icon={<AlertTriangle size={28} className="text-orange-500" />}
                   iconBg="bg-orange-100" trend="down"
                 />
