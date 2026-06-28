@@ -180,13 +180,17 @@ export default function App() {
                   <LiveIncidentFeed
                     onNewReport={handleNewReport}
                     onSelectIncident={setDashboardIncident}
+                    onAcknowledgeRef={(fn) => { window.__safepulseAck = fn; }}
                     searchQuery={searchQuery}
                   />
                   {dashboardIncident && (
                     <IncidentDetailPanel
                       incident={dashboardIncident}
                       onClose={() => setDashboardIncident(null)}
-                      onAcknowledge={() => setDashboardIncident(null)}
+                      onAcknowledge={(id) => {
+                        if (window.__safepulseAck) window.__safepulseAck(id);
+                        setDashboardIncident(null);
+                      }}
                     />
                   )}
                 </div>

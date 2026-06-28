@@ -130,8 +130,11 @@ export default function IncidentDetailPanel({ incident, onClose, onAcknowledge }
 
         <div className="px-6 py-4 border-t border-gray-100 flex gap-3">
           <button
-            onClick={() => { onAcknowledge(incident.id); onClose(); }}
-            className="flex-1 flex items-center justify-center gap-2 bg-emerald-800 hover:bg-emerald-700 active:bg-emerald-900 text-white font-semibold text-sm py-3 rounded-xl transition-colors duration-150 shadow-sm"
+            onClick={() => {
+              onAcknowledge(incident.id);
+              setTimeout(() => onClose(), 400);
+            }}
+            className="flex-1 flex items-center justify-center gap-2 bg-emerald-800 hover:bg-emerald-700 text-white font-semibold text-sm py-3 rounded-xl transition-colors duration-150 shadow-sm"
           >
             Acknowledge
           </button>

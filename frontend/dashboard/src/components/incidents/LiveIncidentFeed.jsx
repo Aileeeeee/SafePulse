@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import IncidentCard from './IncidentCard';
 import { INCIDENT_ENDPOINTS } from '../../api/endpoints';
 import { incidents } from '../../data/incidentData';
@@ -14,7 +14,7 @@ function mapSeverity(level) {
   return 'Low';
 }
 
-export default function LiveIncidentFeed({ onNewReport, onSelectIncident, searchQuery }) {
+export default function LiveIncidentFeed({ onNewReport, onSelectIncident, onAcknowledgeRef, searchQuery }) {
   const [allIncidents, setAllIncidents] = useState([]);
   const [feedItems, setFeedItems] = useState([]);
   const [toast, setToast] = useState(null);
@@ -39,9 +39,9 @@ export default function LiveIncidentFeed({ onNewReport, onSelectIncident, search
           }
         });
 
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`)
-        }
+        if (!response.ok) 
+          throw new Error(`HTTP ${response.status}`);
+        
 
         const data = await response.json();
         const list = Array.isArray(data) ? data : data.results ?? [];
@@ -117,17 +117,30 @@ export default function LiveIncidentFeed({ onNewReport, onSelectIncident, search
     };
   }, [allIncidents, onNewReport]);
 
-  const handleAcknowledge = async (id) => {
+  const handleAcknowledge = useCallback(async (id) => {
     try {
-      await fetch(INCIDENT_ENDPOINTS.ACKNOWLEDGE(id), { method: 'POST' });
+      await fetch(INCIDENT_ENDPOINTS.ACKNOWLEDGE(id), {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('access_token')}` },
+      });
     } catch (error) {
       console.error('Acknowledge failed:', error);
     }
 
     setAcknowledged((prev) => new Set([...prev, id]));
-    setFeedItems((prev) => prev.filter((item) => item.id !== id));
-    setAllIncidents((prev) => prev.filter((item) => item.id !== id));
-  };
+
+    // Move to bottom instead of removing
+    setFeedItems((prev) => {
+      const item = prev.find((i) => i.id === id);
+      const rest = prev.filter((i) => i.id !== id);
+      return item ? [...rest, { ...item, isNew: false, acknowledged: true }] : rest;
+    });
+  }, []);
+
+  useEffect(() => {
+    if (onAcknowledgeRef) onAcknowledgeRef(handleAcknowledge);
+  }, [handleAcknowledge, onAcknowledgeRef]);
+
 
   return (
     <div className="flex flex-col gap-4">
@@ -174,8 +187,9 @@ export default function LiveIncidentFeed({ onNewReport, onSelectIncident, search
                 <IncidentCard
                   incident={item}
                   isNew={item.isNew}
-                  onAcknowledge={handleAcknowledge}
-                  onSelect={onSelectIncident}
+                  onSelect={(inc) => {
+                    if (onSelectIncident) onSelectIncident(inc);
+                  }}
                 />
               </div>
             ));

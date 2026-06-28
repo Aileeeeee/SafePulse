@@ -11,7 +11,7 @@ const typeDot = {
   'Stalking': 'bg-purple-600',
 };
 
-export default function IncidentCard({ incident, isNew, onAcknowledge, onSelect }) {
+export default function IncidentCard({ incident, isNew, onSelect }) {
   const dotColor = typeDot[incident.type] ?? severityDot[incident.severity];
   const badgeStyle = severityColor[incident.severity];
 
@@ -58,7 +58,6 @@ export default function IncidentCard({ incident, isNew, onAcknowledge, onSelect 
           onClick={(e) => {
             e.stopPropagation();
             if (onSelect) onSelect(incident);
-            if (onAcknowledge) onAcknowledge(incident.id);
           }}
           className="flex items-center gap-1.5 bg-emerald-700 hover:bg-emerald-600 active:bg-emerald-800 text-white text-sm font-semibold px-5 py-2 rounded-lg transition-colors duration-150 shadow-sm"
         >
