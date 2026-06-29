@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { FileText, Users, AlertTriangle, ShieldCheck } from 'lucide-react';
 import SplashScreen from './components/auth/SplashScreen';
 import Welcome from './components/auth/Welcome';
@@ -13,6 +13,7 @@ import ActiveAlerts from './components/alerts/ActiveAlerts';
 import TopReportedAreas from './components/TopReportedAreas';
 import IncidentsPage from './components/incidents/IncidentsPage';
 import IncidentDetailPage from './components/incidents/IncidentDetailPage';
+import { AUTH_ENDPOINTS, INCIDENT_ENDPOINTS } from './api/endpoints';
 
 const INITIAL_NEW_REPORTS = 12;
 
@@ -42,12 +43,39 @@ export default function App() {
   const [selectedIncident, setSelectedIncident] = useState(null);
 
   // Dashboard state
-  const [newReports, setNewReports] = useState(INITIAL_NEW_REPORTS);
+  const [newReports, setNewReports] = useState(0);
   const [activeCases]    = useState(6);
   const [escalatedCases] = useState(3);
   const [resolvedCases]  = useState(20);
+  const [userName, setUserName] = useState('');
 
-  const handleNewReport = useCallback(() => setNewReports((p) => p + 1), []);
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    if (!token) return;
+
+    // To fetch User profile
+    fetch(AUTH_ENDPOINTS.PROFILE, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        const name = data.first_name || data.username || data.email || 'Admin';
+        setUserName(name);
+      })
+      .catch(() => setUserName('Admin'));
+
+      //To fetch incident count
+      fetch(INCIDENT_ENDPOINTS.LIST, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          const count = Array.isArray(data) ? data.length : (data.count || data.results?.length || 0);
+          setNewReports(count);
+        })
+        .catch(() => {});
+  }, [screen]);
+
 
   const [dashboardIncident, setDashboardIncident] = useState(null);
   const [searchQuery, setSearchQuery]             = useState('');
@@ -120,6 +148,7 @@ export default function App() {
           newReportsCount={newReports - INITIAL_NEW_REPORTS + 4}
           onLogout={handleLogout}
           onMenuClick={() => setSidebarOpen(true)}
+          userName={userName}
         />
 
         <main className="flex-1 overflow-y-auto">
@@ -143,7 +172,7 @@ export default function App() {
           {activePage === 'dashboard' && (
             <div className="px-4 sm:px-6 py-5">
               <div className="mb-6">
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Welcome back, David!</h1>
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Welcome back, {userName || 'Admin'}!</h1>
                 <p className="text-sm text-gray-500 mt-1">Here's what is happening in your community right now.</p>
               </div>
 
@@ -178,7 +207,6 @@ export default function App() {
               <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
                 <div className="lg:col-span-3">
                   <LiveIncidentFeed
-                    onNewReport={handleNewReport}
                     onSelectIncident={setDashboardIncident}
                     onAcknowledgeRef={(fn) => { window.__safepulseAck = fn; }}
                     searchQuery={searchQuery}

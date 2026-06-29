@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Search, Bell, ChevronDown, User, LogOut, Menu } from 'lucide-react';
 
-export default function Header({ searchQuery, onSearchChange, newReportsCount, onLogout, onMenuClick }) {
+export default function Header({ searchQuery, onSearchChange, newReportsCount, onLogout, onMenuClick, userName }) {
   const [isOpen, setIsOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
@@ -54,7 +54,7 @@ export default function Header({ searchQuery, onSearchChange, newReportsCount, o
             className="w-8 h-8 rounded-full ring-2 ring-emerald-500"
           />
           <div className="hidden md:block">
-            <p className="text-sm font-medium text-black-500">David</p>
+            <p className="text-sm font-medium text-black-500">{userName || 'Admin'}</p>
             <p className="text-xs text-slate-500">NGO Administrator</p>
           </div>
           <button onClick={() => setIsOpen(!isOpen)} className="flex items-center cursor-pointer">
