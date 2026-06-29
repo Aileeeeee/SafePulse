@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { X, MapPinned, MapPin, Clock, MessageSquare, User, Phone } from 'lucide-react';
 import { severityDot } from '../../data/incidentData';
 
@@ -46,6 +47,7 @@ function TimelineItem({ label, time, active }) {
 }
 
 export default function IncidentDetailPanel({ incident, onClose, onAcknowledge }) {
+  const [isAcknowledged, setIsAcknowledged] = useState(false);
   if (!incident) return null;
 
   const dotColor = severityDot[incident.severity];
@@ -131,12 +133,18 @@ export default function IncidentDetailPanel({ incident, onClose, onAcknowledge }
         <div className="px-6 py-4 border-t border-gray-100 flex gap-3">
           <button
             onClick={() => {
+              if (isAcknowledged) return;
+              setIsAcknowledged(true);
               onAcknowledge(incident.id);
-              setTimeout(() => onClose(), 400);
+              setTimeout(() => onClose(), 800);
             }}
-            className="flex-1 flex items-center justify-center gap-2 bg-emerald-800 hover:bg-emerald-700 text-white font-semibold text-sm py-3 rounded-xl transition-colors duration-150 shadow-sm"
+            className={`flex-1 flex items-center justify-center gap-2 font-semibold text-sm py-3 rounded-xl transition-all duration-300 shadow-sm ${
+              isAcknowledged
+                ? 'bg-gray-200 text-gray-500 cursor-default'
+                : 'bg-emerald-800 hover:bg-emerald-700 text-white'
+            }`}
           >
-            Acknowledge
+            {isAcknowledged ? '✓ Acknowledged' : 'Acknowledge'}
           </button>
           <button className="flex-1 flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-white font-semibold text-sm py-3 rounded-xl transition-colors duration-150 shadow-sm">
             Assign

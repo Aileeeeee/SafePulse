@@ -18,7 +18,6 @@ export default function LiveIncidentFeed({ onNewReport, onSelectIncident, onAckn
   const [allIncidents, setAllIncidents] = useState([]);
   const [feedItems, setFeedItems] = useState([]);
   const [toast, setToast] = useState(null);
-  const [acknowledged, setAcknowledged] = useState(new Set());
   const [loading, setLoading] = useState(true);
   const indexRef = useRef(2);
   const feedKeyRef = useRef(100);
@@ -127,7 +126,6 @@ export default function LiveIncidentFeed({ onNewReport, onSelectIncident, onAckn
       console.error('Acknowledge failed:', error);
     }
 
-    setAcknowledged((prev) => new Set([...prev, id]));
 
     // Move to bottom instead of removing
     setFeedItems((prev) => {
@@ -181,7 +179,6 @@ export default function LiveIncidentFeed({ onNewReport, onSelectIncident, onAckn
             : source;
 
           return results
-            .filter((item) => !acknowledged.has(item.id))
             .map((item) => (
               <div key={item.feedKey} className="transition-all duration-500">
                 <IncidentCard
