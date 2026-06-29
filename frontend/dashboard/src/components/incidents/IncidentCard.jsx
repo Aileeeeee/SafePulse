@@ -59,9 +59,13 @@ export default function IncidentCard({ incident, isNew, onSelect }) {
             e.stopPropagation();
             if (onSelect) onSelect(incident);
           }}
-          className="flex items-center gap-1.5 bg-emerald-700 hover:bg-emerald-600 active:bg-emerald-800 text-white text-sm font-semibold px-5 py-2 rounded-lg transition-colors duration-150 shadow-sm"
+          className={`flex items-center gap-1.5 text-sm font-semibold px-5 py-2 rounded-lg transition-colors duration-150 shadow-sm ${
+            incident.acknowledged
+              ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-default'
+              : 'bg-emerald-700 hover:bg-emerald-600 active:bg-emerald-800 text-white'
+          }`}
         >
-          Acknowledge
+          {incident.acknowledged ? '✓ Acknowledged' : 'Acknowledge'}
         </button>
       </div>
     </div>
