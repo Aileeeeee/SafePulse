@@ -22,25 +22,26 @@ class SignupView(APIView):
 
     def post(self, request):
         serializer = SignupSerializer(data=request.data)
-        print("REQUEST DATA:", request.data)
         if serializer.is_valid():
             user = serializer.save()
-            # 2. Use SimpleJWT tokens
             tokens = get_tokens_for_user(user)
 
+            # Return tokens flat at the root level to match LoginView
             return Response({
-                'tokens': tokens,
+                'access': tokens['access'],
+                'refresh': tokens['refresh'],
                 'user': UserProfileSerializer(user).data,
                 'message': 'Account created successfully.'
             }, status=status.HTTP_201_CREATED)
-        print("SERIALIZER ERRORS:", serializer.errors)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+        return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
+        # Your frontend passes "username", which can be either the username string or email string
         login_field = request.data.get('username') or request.data.get('email')
         password    = request.data.get('password')
 
@@ -50,24 +51,20 @@ class LoginView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Find user by username OR email
         try:
             user_obj = User.objects.get(
                 Q(username=login_field) | Q(email=login_field)
             )
         except User.DoesNotExist:
             return Response(
-                {'error': 'Invalid credentials.'},
+                {'error': 'Invalid credentials.'}, # Keep custom error consistent
                 status=status.HTTP_401_UNAUTHORIZED
             )
 
-        # Verify password
         user = authenticate(username=user_obj.username, password=password)
 
         if user:
-            # ── FIXED: GENERATE CRYPTOGRAPHIC JWT TOKENS ──
             refresh = RefreshToken.for_user(user)
-            
             return Response({
                 'access': str(refresh.access_token),
                 'refresh': str(refresh),
