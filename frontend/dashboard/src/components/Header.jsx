@@ -48,13 +48,11 @@ export default function Header({ searchQuery, onSearchChange, newReportsCount, o
         </button>
 
         <div className="relative flex items-center space-x-2 sm:space-x-3 pl-2 sm:pl-3 border-l border-slate-200">
-          <img
-            src="https://avatars.githubusercontent.com/u/12345678?v=4"
-            alt="User Avatar"
-            className="w-8 h-8 rounded-full ring-2 ring-emerald-500"
-          />
+          <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center text-sm font-semibold ring-2 ring-emerald-500">
+            {userName?.charAt(0).toUpperCase() || "A"}
+          </div>
           <div className="hidden md:block">
-            <p className="text-sm font-medium text-black-500">{userName || 'Admin'}</p>
+            <p className="text-sm font-medium text-black">{userName || 'Admin'}</p>
             <p className="text-xs text-slate-500">NGO Administrator</p>
           </div>
           <button onClick={() => setIsOpen(!isOpen)} className="flex items-center cursor-pointer">
