@@ -49,7 +49,13 @@ export default function Header({ searchQuery, onSearchChange, newReportsCount, o
 
         <div className="relative flex items-center space-x-2 sm:space-x-3 pl-2 sm:pl-3 border-l border-slate-200">
           <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center text-sm font-semibold ring-2 ring-emerald-500">
-            {userName?.charAt(0).toUpperCase() || "A"}
+            {userName
+              ? userName
+                  .split(" ")
+                  .map((name) => name.charAt(0))
+                  .join("")
+                  .toUpperCase() 
+              : "A"}
           </div>
           <div className="hidden md:block">
             <p className="text-sm font-medium text-black">{userName || 'Admin'}</p>

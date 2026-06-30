@@ -59,7 +59,9 @@ export default function App() {
     })
       .then((r) => r.json())
       .then((data) => {
-        const name = data.first_name || data.username || data.email || 'Admin';
+        const name = `${data.first_name || ''} ${data.last_name || ''}`.trim() ||
+        data.username || 
+        data.email || 'Admin';
         setUserName(name);
       })
       .catch(() => setUserName('Admin'));
@@ -184,6 +186,12 @@ export default function App() {
                   icon={<FileText size={28} className="text-emerald-700" />}
                   iconBg="bg-emerald-100" trend="up" highlight
                 />
+               {/* <StatsCard
+                  title="Total Reports" value={totalReports} delta={0}
+                  deltaLabel="All time"
+                  icon={<Database size={28} className="text-violet-600" />}
+                  iconBg="bg-violet-100" trend="up"
+                /> */}
                 <StatsCard
                   title="Active Cases" value={activeCases} delta={3}
                   deltaLabel="From yesterday"
