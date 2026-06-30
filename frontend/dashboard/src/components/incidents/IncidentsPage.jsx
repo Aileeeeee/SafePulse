@@ -5,9 +5,15 @@ import { INCIDENT_ENDPOINTS } from '../../api/endpoints';
 // Field helpers
 
 function getStatus(inc) {
-  const s = (inc.status || '').toLowerCase();
+  const s = (
+   // inc.follow_up_status ||
+    inc.status ||
+    ''
+  ).toLowerCase();
+
   if (s === 'resolved' || s === 'closed') return 'Resolved';
-  if (s === 'ongoing'  || s === 'active') return 'Active';
+  if (s === 'ongoing' || s === 'active') return 'Active';
+
   return 'New';
 }
 
@@ -145,7 +151,7 @@ export default function IncidentsPage({ onSelectIncident }) {
     date:     formatDate(inc),
     status:   getStatus(inc),
     severity: getSeverityLabel(inc),
-    channel:  inc.channel || '—',
+    channel:  inc.reporting_channel || '—',
   }));
 
   const filtered = mapped.filter((inc) => {
@@ -247,11 +253,29 @@ export default function IncidentsPage({ onSelectIncident }) {
                   location:        inc._raw.location || '—',
                   time:            inc.time,
                   date:            inc.date,
-                  channel:         inc._raw.channel || '—',
+                  channel:         inc._raw.reporting_channel || '—',
                   notes:           inc._raw.notes || '',
                   lat:             inc._raw.latitude  || inc._raw.lat  || 6.5244,
                   lng:             inc._raw.longitude || inc._raw.lng  || 3.3792,
-                  timeline:        inc._raw.timeline         || [],
+                  timeline: [
+                    {
+                      time: inc.time,
+                      title: 'Report received',
+                      desc: `Anonymous report submitted via ${inc._raw.reporting_channel || 'unknown channel'}`,
+                    },
+                    ...(inc._raw.acknowledged_at ? [{
+                      time: new Date(inc._raw.acknowledged_at).toLocaleString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+                      title: 'Triage completed',
+                      desc: 'Acknowledged by NGO coordinator',
+                    }] : []),
+                    ...(inc.status === 'Resolved' ? [{
+                      time: inc._raw.resolved_at
+                        ? new Date(inc._raw.resolved_at).toLocaleString('en-GB', { hour: '2-digit', minute: '2-digit' })
+                        : '—',
+                      title: 'Case closed',
+                      desc: 'No further escalation reported',
+                    }] : []),
+                  ],
                   trustedContacts: inc._raw.trusted_contacts || [],
                 })}
                 className={`grid grid-cols-[80px_1fr_1fr_120px_100px_180px] gap-x-4 px-6 py-4 items-center cursor-pointer transition-colors hover:bg-gray-50 ${
@@ -294,11 +318,29 @@ export default function IncidentsPage({ onSelectIncident }) {
                   location:        inc._raw.location || '—',
                   time:            inc.time,
                   date:            inc.date,
-                  channel:         inc._raw.channel || '—',
+                  channel:         inc._raw.reporting_channel || '—',
                   notes:           inc._raw.notes || '',
                   lat:             inc._raw.latitude  || inc._raw.lat  || 6.5244,
                   lng:             inc._raw.longitude || inc._raw.lng  || 3.3792,
-                  timeline:        inc._raw.timeline         || [],
+                  timeline: [
+                    {
+                      time: inc.time,
+                      title: 'Report received',
+                      desc: `Anonymous report submitted via ${inc._raw.reporting_channel || 'unknown channel'}`,
+                    },
+                    ...(inc._raw.acknowledged_at ? [{
+                      time: new Date(inc._raw.acknowledged_at).toLocaleString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+                      title: 'Triage completed',
+                      desc: 'Acknowledged by NGO coordinator',
+                    }] : []),
+                    ...(inc.status === 'Resolved' ? [{
+                      time: inc._raw.resolved_at
+                        ? new Date(inc._raw.resolved_at).toLocaleString('en-GB', { hour: '2-digit', minute: '2-digit' })
+                        : '—',
+                      title: 'Case closed',
+                      desc: 'No further escalation reported',
+                    }] : []),
+                  ],
                   trustedContacts: inc._raw.trusted_contacts || [],
                 })}
                 className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 cursor-pointer active:bg-gray-50 transition-colors"
